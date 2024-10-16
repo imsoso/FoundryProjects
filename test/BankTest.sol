@@ -11,7 +11,19 @@ import {Bank} from "../src/Bank.sol";
 contract  BankTest is Test {
      Bank public bank;
     
-    function setUp() public {
+       function setUp() public {
         bank = new Bank();
+    }
+
+    function testDepositETH() public {
+        address user = address(1);        
+        vm.deal(user, 100);// init user balance
+
+        uint amount = 1 ;
+        vm.prank(user);
+        bank.depositETH{value: amount}();
+
+        uint bankBalance = bank.balanceOf(user);
+        assertEq(bankBalance, amount);
     }
 }
