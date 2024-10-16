@@ -63,4 +63,14 @@ contract NFTMarket is IERC721Receiver {
         nftToken.transfer(aNFT.seller, amount);
         delete NFTList[tokenId];
     }
+
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external pure override returns (bytes4) {
+        // do nothing here
+        return IERC721Receiver.onERC721Received.selector;
+    }
 }
