@@ -20,11 +20,11 @@ contract SosoNFT is ERC721URIStorage  {
         uint256 private _tokenIdCounter;
     constructor() ERC721("SosoNFT", "SSFT") {}
         function mint(address receiver, string memory uri) public returns (uint256) {
+            _tokenIdCounter += 1;
+
             uint256 tokenId = _tokenIdCounter;
             _mint(receiver, tokenId);
-            _tokenIdCounter += 1;
             _setTokenURI(tokenId, uri);
             return tokenId;
-
         }
 }
