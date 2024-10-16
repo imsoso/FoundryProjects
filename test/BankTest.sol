@@ -15,11 +15,16 @@ contract  BankTest is Test {
         bank = new Bank();
     }
 
+    event Deposit(address indexed user, uint amount);
+
     function testDepositETH() public {
         address user = address(1);        
         vm.deal(user, 100);// init user balance
-
         uint amount = 1 ;
+
+        vm.expectEmit(true, true, false, true);
+        emit Deposit(user, amount);
+
         vm.prank(user);
         bank.depositETH{value: amount}();
 
