@@ -9,9 +9,12 @@ pragma solidity >=0.8.20;
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract NFTMarket is IERC721Receiver {
     IERC721 public nftMarket;
     
+    IERC20 public nftToken;
+
     struct NFTProduct {
         uint256 price;      
         address seller;     
@@ -19,8 +22,9 @@ contract NFTMarket is IERC721Receiver {
 
     mapping(uint256 => NFTProduct) public NFTList;
 
-    constructor(IERC721 _nftContract) {
-        nftMarket = _nftContract;
+    constructor(IERC721 _nftMarket,IERC20 _nftToken) {
+        nftMarket = _nftMarket;
+        nftToken = _nftToken;
     }
 
     // List NFT on the market
@@ -34,4 +38,14 @@ contract NFTMarket is IERC721Receiver {
             seller: msg.sender
         });
     }
+
+    function buyNFT(uint256 tokenId) external {
+        NFTProduct memory aNFT = NFTList[tokenId];
+        require(aNFT.price > 0, "NFT is not listed");
+        nftToken.transferFrom(msg.sender, aNFT.seller, aNFT.price);
+        nftMarket.safeTransferFrom(address(this), msg.sender, tokenId);
+        delete NFTList[tokenId];
+
+    }
+
 }
