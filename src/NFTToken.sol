@@ -15,25 +15,19 @@
  */
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract SosoNFT is ERC721 {
-    uint256 public tokenCounter;
-    uint256 public maxTokenIds = 1000000;
-    uint256 public tokenIds;
-    uint256 public _price = 0.01 ether;
-
+contract SosoNFT is ERC721URIStorage {
+    Counters.Counter private _tokenIds;
     constructor() ERC721("SosoNFT", "SSFT") {}
 
-    function _baseURI() internal pure override returns (string memory) {
-        return "ipfs://chocolate-acceptable-hawk-967.mypinata.cloud";
-    }
+    function mint(address to, string memory uri) public returns (uint256) {
+        _tokenIds.increment();
 
-    function mint() public payable {
-        require(tokenIds < maxTokenIds, "Exceed maximum LW3Punks supply");
-        tokenIds += 1;
-        _safeMint(msg.sender, tokenIds);
+        uint256 tokenID = _tokenIds.current();
+        _mint(to, tokenID);
+        _setTokenURI(tokenID, uri);
+        return tokenID;
     }
 }
