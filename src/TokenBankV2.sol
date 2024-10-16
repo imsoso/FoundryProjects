@@ -15,7 +15,8 @@ contract TokenBankV2 is TokenBank {
         token = _token;
     }
 
-    function tokenReceived(uint256 value) public {
-        deposit(value);
+    function tokenReceived(address from, uint256 value) public {
+        require(msg.sender == admin, "Not admin");
+        balances[from] += value;
     }
 }
