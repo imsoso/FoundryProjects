@@ -10,8 +10,15 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract NFTMarket is IERC721Receiver {
-    // NFT contract
     IERC721 public nftMarket;
+    
+    struct NFTProduct {
+        uint256 price;      
+        address seller;     
+    }
+
+    mapping(uint256 => NFTProduct) public NFTList;
+
     constructor(IERC721 _nftContract) {
         nftMarket = _nftContract;
     }
@@ -20,5 +27,9 @@ contract NFTMarket is IERC721Receiver {
     function list(uint256 tokenId, uint256 price) external {
         // Transfer NFT to the market, make it available for sale
         nftMarket.safeTransferFrom(msg.sender, address(this), tokenId);
+        NFTList[tokenId] = NFTProduct({
+            price: price,
+            seller: msg.sender
+        });
     }
 }
