@@ -17,6 +17,12 @@ contract CounterTest is Test {
         assertEq(counter.number(), 1);
     }
 
+    function test_Admin_Increment() public {
+        vm.prank(0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38);
+        counter.increment();
+        assertEq(counter.number(), 1);
+    }
+
     function testFuzz_SetNumber(uint256 x) public {
         counter.setNumber(x);
         assertEq(counter.number(), x);
