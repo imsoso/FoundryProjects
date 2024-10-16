@@ -25,6 +25,8 @@ contract NFTMarket is IERC721Receiver {
 
     // List NFT on the market
     function list(uint256 tokenId, uint256 price) external {
+        require(nftMarket.ownerOf(tokenId) == msg.sender, "You are not the owner");
+        require(price > 0, "Price must be greater than zero");
         // Transfer NFT to the market, make it available for sale
         nftMarket.safeTransferFrom(msg.sender, address(this), tokenId);
         NFTList[tokenId] = NFTProduct({
