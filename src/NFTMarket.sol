@@ -48,4 +48,16 @@ contract NFTMarket is IERC721Receiver {
 
     }
 
+    function tokensReceived(
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata userData
+    ) external {
+        uint256 tokenId = abi.decode(userData, (uint256));  
+        NFTProduct memory aNFT = NFTList[tokenId];
+        nftMarket.safeTransferFrom(address(this), from, tokenId);
+        nftToken.transfer(aNFT.seller, amount);
+        delete NFTList[tokenId];
+    }
 }
