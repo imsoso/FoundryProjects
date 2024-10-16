@@ -50,12 +50,15 @@ contract NFTMarket is IERC721Receiver {
 
     function tokensReceived(
         address from,
-        address to,
         uint256 amount,
         bytes calldata userData
     ) external {
-        uint256 tokenId = abi.decode(userData, (uint256));  
+        require(msg.sender == address(nftToken), "Only the ERC20 token contract can call this");
+        uint256 tokenId = abi.decode(userData, (uint256));
         NFTProduct memory aNFT = NFTList[tokenId];
+        require(aNFT.price > 0, "NFT is not listed for sale");
+        require(amount == aNFT.price, "Incorrect payment amount");
+
         nftMarket.safeTransferFrom(address(this), from, tokenId);
         nftToken.transfer(aNFT.seller, amount);
         delete NFTList[tokenId];
