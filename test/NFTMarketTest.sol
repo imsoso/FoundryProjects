@@ -36,6 +36,15 @@ contract NFTMarketTest is Test {
     }
 
     function test_list() public {
+        vm.expectRevert("You are not the owner");
+        aNftMarket.list(nftId, 100);
+
+        vm.startPrank(alice);
+        aNFT.approve(address(aNftMarket), nftId);
+        vm.expectRevert("Price must be greater than zero");
+        aNftMarket.list(nftId, 0);
+        vm.stopPrank();
+
         vm.startPrank(alice);
         aNFT.approve(address(aNftMarket), nftId);
         aNftMarket.list(nftId, 100);
