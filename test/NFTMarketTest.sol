@@ -35,5 +35,10 @@ contract NFTMarketTest is Test {
         aNftMarket = new NFTMarket(address(aNFT), address(aToken));
     }
 
-    function setUp() public {}
+    function test_list() public {
+        vm.startPrank(alice);
+        aNFT.approve(address(aNftMarket), nftId);
+        aNftMarket.list(nftId, 100);
+        vm.stopPrank();
+    }
 }
