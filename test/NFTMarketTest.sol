@@ -69,11 +69,18 @@ contract NFTMarketTest is Test {
         vm.stopPrank();
     }
 
+    function test_buy_succeed() public {
         vm.startPrank(alice);
         aNFT.approve(address(aNftMarket), nftId);
+
         aNftMarket.list(nftId, 100);
-        vm.expectRevert("ERC20: transfer amount exceeds balance");
-        aNftMarket.buyNFT(nftId);
         vm.stopPrank();
+
+        deal(address(aToken), bob, 1000000000);
+        vm.prank(bob);
+        aToken.approve(address(aNftMarket), 200);
+
+        aNftMarket.buyNFT(bob, 100, nftId);
+        assertEq(aNFT.ownerOf(nftId), bob, "NFT should belong to user1");
     }
 }
