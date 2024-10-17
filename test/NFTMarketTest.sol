@@ -60,7 +60,7 @@ contract NFTMarketTest is Test {
         aNftMarket.buyNFT(alice, 100, nftId);
     }
 
-    function test_buy_not_for_sale() public {
+    function test_buy_own() public {
         vm.startPrank(alice);
         aNFT.approve(address(aNftMarket), nftId);
         aNftMarket.list(nftId, 100);
