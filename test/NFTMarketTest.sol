@@ -50,4 +50,9 @@ contract NFTMarketTest is Test {
         aNftMarket.list(nftId, 100);
         vm.stopPrank();
     }
+
+    function test_buy() public {
+        vm.expectRevert("NFT is not listed");
+        aNftMarket.buyNFT(nftId);
+    }
 }
