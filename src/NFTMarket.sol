@@ -12,31 +12,33 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract NFTMarket is IERC721Receiver {
     IERC721 public nftMarket;
-    
+
     IERC20 public nftToken;
 
     struct NFTProduct {
-        uint256 price;      
-        address seller;     
+        uint256 price;
+        address seller;
     }
+
+    IERC20 public ir3;
 
     mapping(uint256 => NFTProduct) public NFTList;
 
-    constructor(IERC721 _nftMarket,IERC20 _nftToken) {
+    constructor(IERC721 _nftMarket, IERC20 _nftToken) {
         nftMarket = _nftMarket;
         nftToken = _nftToken;
     }
 
     // List NFT on the market
     function list(uint256 tokenId, uint256 price) external {
-        require(nftMarket.ownerOf(tokenId) == msg.sender, "You are not the owner");
+        require(
+            nftMarket.ownerOf(tokenId) == msg.sender,
+            "You are not the owner"
+        );
         require(price > 0, "Price must be greater than zero");
         // Transfer NFT to the market, make it available for sale
         nftMarket.safeTransferFrom(msg.sender, address(this), tokenId);
-        NFTList[tokenId] = NFTProduct({
-            price: price,
-            seller: msg.sender
-        });
+        NFTList[tokenId] = NFTProduct({price: price, seller: msg.sender});
     }
 
     function buyNFT(uint256 tokenId) external {
@@ -45,7 +47,6 @@ contract NFTMarket is IERC721Receiver {
         nftToken.transferFrom(msg.sender, aNFT.seller, aNFT.price);
         nftMarket.safeTransferFrom(address(this), msg.sender, tokenId);
         delete NFTList[tokenId];
-
     }
 
     function tokensReceived(
@@ -53,7 +54,10 @@ contract NFTMarket is IERC721Receiver {
         uint256 amount,
         bytes calldata userData
     ) external {
-        require(msg.sender == address(nftToken), "Only the ERC20 token contract can call this");
+        require(
+            msg.sender == address(nftToken),
+            "Only the ERC20 token contract can call this"
+        );
         uint256 tokenId = abi.decode(userData, (uint256));
         NFTProduct memory aNFT = NFTList[tokenId];
         require(aNFT.price > 0, "NFT is not listed for sale");
