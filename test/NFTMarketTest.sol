@@ -59,4 +59,13 @@ contract NFTMarketTest is Test {
         vm.expectRevert("NFT is not listed");
         aNftMarket.buyNFT(nftId);
     }
+
+    function test_buy_insuficient_balance() public {
+        vm.startPrank(alice);
+        aNFT.approve(address(aNftMarket), nftId);
+        aNftMarket.list(nftId, 100);
+        vm.expectRevert("ERC20: transfer amount exceeds balance");
+        aNftMarket.buyNFT(nftId);
+        vm.stopPrank();
+    }
 }
