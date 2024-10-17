@@ -55,12 +55,20 @@ contract NFTMarketTest is Test {
         vm.stopPrank();
     }
 
-    function test_buy_not_for_sale() public {
-        vm.expectRevert("NFT is not listed");
-        aNftMarket.buyNFT(nftId);
+    function test_buy_insuficient_balance() public {
+        vm.expectRevert("Insufficient payment token balance");
+        aNftMarket.buyNFT(alice, 100, nftId);
     }
 
-    function test_buy_insuficient_balance() public {
+    function test_buy_not_for_sale() public {
+        vm.startPrank(alice);
+        aNFT.approve(address(aNftMarket), nftId);
+        aNftMarket.list(nftId, 100);
+        vm.expectRevert("You cannot buy your own NFT");
+        aNftMarket.buyNFT(alice, 100, nftId);
+        vm.stopPrank();
+    }
+
         vm.startPrank(alice);
         aNFT.approve(address(aNftMarket), nftId);
         aNftMarket.list(nftId, 100);
