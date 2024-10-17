@@ -39,13 +39,24 @@ contract NFTMarket is IERC721Receiver {
         nftMarket.safeTransferFrom(msg.sender, address(this), tokenId);
         NFTList[tokenId] = NFTProduct({price: price, seller: msg.sender});
     }
+    function buyNFT(address buyer, uint256 amount, uint256 nftId) public {
+        NFTProduct memory aNFT = NFTList[nftId];
+        //You cannot buy your own NFT
+        require(aNFT.seller != buyer, "You cannot buy your own NFT");
 
-    function buyNFT(uint256 tokenId) external {
-        NFTProduct memory aNFT = NFTList[tokenId];
-        require(aNFT.price > 0, "NFT is not listed");
-        nftToken.transferFrom(msg.sender, aNFT.seller, aNFT.price);
-        nftMarket.safeTransferFrom(address(this), msg.sender, tokenId);
-        delete NFTList[tokenId];
+        require(
+            nftToken.balanceOf(buyer) >= amount,
+            "Insufficient payment token balance"
+        );
+
+        require(amount == aNFT.price, "Insufficient token amount to buy NFT");
+        require(
+            nftToken.transferFrom(buyer, aNFT.seller, aNFT.price),
+            "Token transfer failed"
+        );
+
+        nftMarket.transferFrom(address(this), buyer, nftId);
+        delete NFTList[nftId];
     }
 
     function tokensReceived(
