@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract NFTMarket is IERC721Receiver {
     IERC721 public nftMarket;
 
@@ -20,13 +21,11 @@ contract NFTMarket is IERC721Receiver {
         address seller;
     }
 
-    IERC20 public ir3;
-
     mapping(uint256 => NFTProduct) public NFTList;
 
-    constructor(IERC721 _nftMarket, IERC20 _nftToken) {
-        nftMarket = _nftMarket;
-        nftToken = _nftToken;
+    constructor(address _nftMarket, address _nftToken) {
+        nftMarket = IERC721(_nftMarket);
+        nftToken = IERC20(_nftToken);
     }
 
     // List NFT on the market
