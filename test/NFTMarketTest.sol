@@ -76,7 +76,7 @@ contract NFTMarketTest is Test {
         aNftMarket.list(nftId, 100);
         vm.stopPrank();
 
-        deal(address(aToken), bob, 1000000000);
+        deal(address(aToken), bob, 10000);
         vm.prank(bob);
         aToken.approve(address(aNftMarket), 200);
 
