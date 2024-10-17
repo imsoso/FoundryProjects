@@ -35,23 +35,27 @@ contract NFTMarketTest is Test {
         aNftMarket = new NFTMarket(address(aNFT), address(aToken));
     }
 
-    function test_list() public {
+    function test_list_not_owner() public {
         vm.expectRevert("You are not the owner");
         aNftMarket.list(nftId, 100);
+    }
 
+    function test_list_zero_price() public {
         vm.startPrank(alice);
         aNFT.approve(address(aNftMarket), nftId);
         vm.expectRevert("Price must be greater than zero");
         aNftMarket.list(nftId, 0);
         vm.stopPrank();
+    }
 
+    function test_list_succeed() public {
         vm.startPrank(alice);
         aNFT.approve(address(aNftMarket), nftId);
         aNftMarket.list(nftId, 100);
         vm.stopPrank();
     }
 
-    function test_buy() public {
+    function test_buy_not_for_sale() public {
         vm.expectRevert("NFT is not listed");
         aNftMarket.buyNFT(nftId);
     }
