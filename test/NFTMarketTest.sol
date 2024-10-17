@@ -8,10 +8,32 @@ pragma solidity >=0.8.20;
 */
 import {Test, console} from "forge-std/Test.sol";
 import {NFTMarket} from "../src/NFTMarket.sol";
+import {BaseERC20} from "../src/MyERCToken.sol";
+import {SosoNFT} from "../src/NFTToken.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 contract NFTMarketTest is Test {
-    NFTMarket public nftMarket;
+    NFTMarket aNftMarket;
+    BaseERC20 aToken;
+    SosoNFT aNFT;
+
+    uint256 nftId;
+    address alice = makeAddr("alice");
+    address bob = makeAddr("bob");
+
+    function setUp() public {
+        aToken = new BaseERC20();
+        aNFT = new SosoNFT();
+        nftId = aNFT.mint(
+            alice,
+            "https://chocolate-acceptable-hawk-967.mypinata.cloud/ipfs/QmSpTwSkZy8Hx7xBDrugDmbzRf5kkwnsVxdsbcAnaHAawu/0"
+        );
+
+        aNftMarket = new NFTMarket(address(aNFT), address(aToken));
+    }
 
     function setUp() public {}
 }
