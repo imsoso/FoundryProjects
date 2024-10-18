@@ -113,4 +113,23 @@ contract NFTMarketTest is Test {
         vm.expectRevert("Insufficient token amount to buy NFT");
         aNftMarket.buyNFT(bob, 200, nftId);
     }
+
+    /// forge-config: default.fuzz.runs = 100
+    function test_fuzz_buy(uint256 price, address buyer) public {
+        vm.startPrank(alice);
+        price = bound(price, 0.01 ether, 10000 ether);
+        vm.assume(price > 0.01 ether && price < 10000 ether);
+
+        aNFT.approve(address(aNftMarket), nftId);
+        // Test with random price
+        aNftMarket.list(nftId, price);
+        vm.stopPrank();
+
+        vm.prank(buyer);
+        aToken.approve(address(aNftMarket), price);
+        deal(address(aToken), buyer, price);
+
+        // Test with random address
+        aNftMarket.buyNFT(buyer, price, nftId);
+    }
 }
