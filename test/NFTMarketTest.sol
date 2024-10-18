@@ -99,4 +99,18 @@ contract NFTMarketTest is Test {
         vm.expectRevert("Insufficient token amount to buy NFT");
         aNftMarket.buyNFT(bob, 100, nftId);
     }
+    function test_too_much_token() public {
+        vm.startPrank(alice);
+        aNFT.approve(address(aNftMarket), nftId);
+
+        aNftMarket.list(nftId, 100);
+        vm.stopPrank();
+
+        deal(address(aToken), bob, 10000);
+        vm.prank(bob);
+        aToken.approve(address(aNftMarket), 300);
+
+        vm.expectRevert("Insufficient token amount to buy NFT");
+        aNftMarket.buyNFT(bob, 200, nftId);
+    }
 }
