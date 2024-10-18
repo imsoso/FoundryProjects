@@ -81,6 +81,22 @@ contract NFTMarketTest is Test {
         aToken.approve(address(aNftMarket), 200);
 
         aNftMarket.buyNFT(bob, 100, nftId);
-        assertEq(aNFT.ownerOf(nftId), bob, "NFT should belong to user1");
+        assertEq(aNFT.ownerOf(nftId), bob, "NFT is not belong to you");
+    }
+
+    function test_buy_twice() public {
+        vm.startPrank(alice);
+        aNFT.approve(address(aNftMarket), nftId);
+
+        aNftMarket.list(nftId, 100);
+        vm.stopPrank();
+
+        deal(address(aToken), bob, 10000);
+        vm.prank(bob);
+        aToken.approve(address(aNftMarket), 300);
+
+        aNftMarket.buyNFT(bob, 100, nftId);
+        vm.expectRevert("Insufficient token amount to buy NFT");
+        aNftMarket.buyNFT(bob, 100, nftId);
     }
 }
