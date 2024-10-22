@@ -12,6 +12,10 @@ pragma solidity ^0.8.20;
 error InvalidConstructParameters();
 
 contract MultiSignatureWallet {
+    mapping(address => bool) public canSign;
+
+    event NewSignerAdded(address signer);
+
     constructor(address[] memory _allSigners, uint256 _requiredApprovals) {
         if (
             _allSigners.length < _requiredApprovals ||
@@ -19,6 +23,11 @@ contract MultiSignatureWallet {
             _allSigners.length == 0
         ) {
             revert InvalidConstructParameters();
+        }
+
+        for (uint256 i = 0; i < _allSigners.length; i++) {
+            canSign[_allSigners[i]] = true;
+            emit NewSignerAdded(_allSigners[i]);
         }
     }
 }
