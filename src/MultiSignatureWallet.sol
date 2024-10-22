@@ -68,8 +68,8 @@ contract MultiSignatureWallet {
         ProposalType proposalType,
         address operatedSigner
     ) external {
-        uint256 proposalId = proposalNumber++;
-        Proposal storage proposal = proposals[proposalId];
+        uint256 proposalID = proposalNumber++;
+        Proposal storage proposal = proposals[proposalID];
         proposal.to = to;
         proposal.value = value;
         proposal.data = data;
@@ -77,7 +77,7 @@ contract MultiSignatureWallet {
         proposal.operatedSigner = operatedSigner;
 
         emit ProposalInitiate(
-            proposalId,
+            proposalID,
             to,
             value,
             data,
