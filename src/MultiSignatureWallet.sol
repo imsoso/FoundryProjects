@@ -10,6 +10,7 @@
 pragma solidity ^0.8.20;
 
 error InvalidConstructParameters();
+error ProposalIsExecuted();
 
 contract MultiSignatureWallet {
     mapping(address => bool) public canSign;
@@ -17,6 +18,7 @@ contract MultiSignatureWallet {
     uint256 public proposalNumber;
 
     event NewSignerAdded(address signer);
+    event ProposalApproved(uint256 indexed proposalID, address signer);
 
     enum ProposalType {
         Execute,
@@ -84,5 +86,16 @@ contract MultiSignatureWallet {
             proposalType,
             operatedSigner
         );
+    }
+
+    function approveProposal(uint256 proposalID) external {
+        Proposal storage proposal = proposals[proposalID];
+        if (proposal.isExecuted) revert ProposalIsExecuted();
+        if (proposal.isApproved[msg.sender]) return;
+
+        proposal.approvals++;
+        proposal.isApproved[msg.sender] = true;
+
+        emit ProposalApproved(proposalID, msg.sender);
     }
 }
