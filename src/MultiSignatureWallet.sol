@@ -11,14 +11,29 @@ pragma solidity ^0.8.20;
 
 error InvalidConstructParameters();
 error ProposalIsExecuted();
+error MoreApprovalsNeeded();
+error InsufficientBalance();
+error ExecutionIsFailed();
+error SignerNotAbleToRemove();
 
 contract MultiSignatureWallet {
     mapping(address => bool) public canSign;
 
     uint256 public proposalNumber;
+    uint256 public immutable requiredApprovals;
+    uint256 public numberCanSign;
 
     event NewSignerAdded(address signer);
+    event SignerIsRemoved(address signer);
+
     event ProposalApproved(uint256 indexed proposalID, address signer);
+    event ProposalExecuted(
+        uint256 indexed proposalId,
+        address to,
+        uint256 value,
+        ProposalType proposalType,
+        address signerToAddOrRemove
+    );
 
     enum ProposalType {
         Execute,
@@ -61,6 +76,8 @@ contract MultiSignatureWallet {
             canSign[_allSigners[i]] = true;
             emit NewSignerAdded(_allSigners[i]);
         }
+
+        requiredApprovals = _requiredApprovals;
     }
 
     function initiateProposal(
@@ -97,5 +114,49 @@ contract MultiSignatureWallet {
         proposal.isApproved[msg.sender] = true;
 
         emit ProposalApproved(proposalID, msg.sender);
+    }
+
+    function executeProposal(uint256 proposalID) external {
+        Proposal storage proposal = proposals[proposalID];
+        if (proposal.isExecuted) revert ProposalIsExecuted();
+        if (proposal.approvals < requiredApprovals)
+            revert MoreApprovalsNeeded();
+
+        // Execute
+        if (proposal.proposalType == ProposalType.Execute) {
+            if (address(this).balance < proposal.value)
+                revert InsufficientBalance();
+            (bool success, ) = proposal.to.call{value: proposal.value}(
+                proposal.data
+            );
+
+            if (!success) revert ExecutionIsFailed();
+            // Add Signer
+        } else if (proposal.proposalType == ProposalType.AddSigner) {
+            if (!canSign[proposal.operatedSigner]) {
+                canSign[proposal.operatedSigner] = true;
+                numberCanSign++;
+                emit NewSignerAdded(proposal.operatedSigner);
+            }
+            // Remove Signer
+        } else if (proposal.proposalType == ProposalType.RemoveSigner) {
+            if (canSign[proposal.operatedSigner]) {
+                if (numberCanSign <= requiredApprovals)
+                    revert SignerNotAbleToRemove();
+                canSign[proposal.operatedSigner] = false;
+                numberCanSign--;
+                emit SignerIsRemoved(proposal.operatedSigner);
+            }
+        }
+
+        proposal.isExecuted = true;
+
+        emit ProposalExecuted(
+            proposalID,
+            proposal.to,
+            proposal.value,
+            proposal.proposalType,
+            proposal.operatedSigner
+        );
     }
 }
