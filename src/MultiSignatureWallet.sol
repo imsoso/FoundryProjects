@@ -60,4 +60,29 @@ contract MultiSignatureWallet {
             emit NewSignerAdded(_allSigners[i]);
         }
     }
+
+    function initiateProposal(
+        address to,
+        uint256 value,
+        bytes memory data,
+        ProposalType proposalType,
+        address operatedSigner
+    ) external {
+        uint256 proposalId = proposalNumber++;
+        Proposal storage proposal = proposals[proposalId];
+        proposal.to = to;
+        proposal.value = value;
+        proposal.data = data;
+        proposal.proposalType = proposalType;
+        proposal.operatedSigner = operatedSigner;
+
+        emit ProposalInitiate(
+            proposalId,
+            to,
+            value,
+            data,
+            proposalType,
+            operatedSigner
+        );
+    }
 }
