@@ -14,7 +14,37 @@ error InvalidConstructParameters();
 contract MultiSignatureWallet {
     mapping(address => bool) public canSign;
 
+    uint256 public proposalNumber;
+
     event NewSignerAdded(address signer);
+
+    enum ProposalType {
+        Execute,
+        AddSigner,
+        RemoveSigner
+    }
+
+    struct Proposal {
+        address to;
+        uint256 value;
+        bytes data;
+        uint256 approvals;
+        mapping(address => bool) isApproved;
+        ProposalType proposalType;
+        bool isExecuted;
+        address operatedSigner; // signer who is removed or added
+    }
+
+    event ProposalInitiate(
+        uint256 indexed proposalID,
+        address to,
+        uint256 value,
+        bytes data,
+        ProposalType proposalType,
+        address operatedSigner
+    );
+
+    mapping(uint256 => Proposal) public proposals;
 
     constructor(address[] memory _allSigners, uint256 _requiredApprovals) {
         if (
