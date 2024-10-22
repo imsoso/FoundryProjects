@@ -9,4 +9,16 @@
 */
 pragma solidity ^0.8.20;
 
-contract MultiSignatureWallet {}
+error InvalidConstructParameters();
+
+contract MultiSignatureWallet {
+    constructor(address[] memory _allSigners, uint256 _requiredApprovals) {
+        if (
+            _allSigners.length < _requiredApprovals ||
+            _requiredApprovals == 0 ||
+            _allSigners.length == 0
+        ) {
+            revert InvalidConstructParameters();
+        }
+    }
+}
