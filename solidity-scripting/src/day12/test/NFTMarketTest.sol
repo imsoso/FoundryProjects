@@ -50,7 +50,7 @@ contract NFTMarketTest is Test {
         );
     }
 
-    function testPermitBuySuccess() public {
+    function testPermitBuyInWhitelist() public {
         // Prepare variables
         uint256 price = 10 * 10 ** tokenPermit.decimals();
         uint256 tokenId = 0;
