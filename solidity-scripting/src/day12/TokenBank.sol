@@ -10,16 +10,19 @@ pragma solidity ^0.8.0;
 有测试用例运行日志或截图，能够看到 Token 及 NFT 转移。
 */
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./SosoToken2621.sol";
 
 contract TokenBank {
     address admin;
     IERC20 public token;
+    SosoToken2621 public tokenPermit;
 
     mapping(address => uint) internal balances;
 
-    constructor(IERC20 _token) {
+    constructor(address _token) {
         admin = msg.sender;
-        token = _token;
+        token = IERC20(_token);
+        tokenPermit = SosoToken2621(_token);
     }
 
     // 提取函数：用户提取自己的 token，管理员可以提取所有 token
@@ -52,5 +55,26 @@ contract TokenBank {
 
         // 记录用户的存款
         balances[msg.sender] += amount;
+    }
+
+    // permit before deposit
+    function permitDeposit(
+        uint256 amount,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) public {
+        tokenPermit.permit(
+            msg.sender,
+            address(this),
+            amount,
+            deadline,
+            v,
+            r,
+            s
+        );
+
+        deposit(amount);
     }
 }
