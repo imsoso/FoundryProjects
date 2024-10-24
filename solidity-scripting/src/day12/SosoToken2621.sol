@@ -19,4 +19,8 @@ contract SosoToken2621 is ERC20Permit {
     ) ERC20(name, symbol) ERC20Permit(name) {
         _mint(msg.sender, 1e10 * 1e18);
     }
+
+    function mint(address to, uint256 amount) public {
+        _mint(to, amount);
+    }
 }
