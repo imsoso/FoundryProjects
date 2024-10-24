@@ -122,68 +122,64 @@ contract NFTMarketTest is Test {
         assertEq(listedPrice, 0);
     }
 
-    // function testPermitBuyNotWhitelisted() public {
-    //     uint256 price = 100 * 10 ** tokenPermit.decimals();
-    //     uint256 tokenId = 0;
-    //     uint256 deadline = block.timestamp + 1 hours;
+    function testPermitBuyNotWhitelisted() public {
+        // Prepare variables
+        uint256 price = 10 * 10 ** tokenPermit.decimals();
+        uint256 tokenId = 0;
+        uint256 deadline = block.timestamp + 20 minutes;
+        vm.prank(owner);
+        nftMarket.setWhitelistSigner(whitelistSigner);
 
-    //     // set whitelist signer
-    //     vm.prank(owner);
-    //     nftMarket.setWhitelistSigner(whitelistSigner);
+        // Stock NFT
+        vm.startPrank(seller);
+        nftContract.approve(address(nftMarket), tokenId);
+        nftMarket.list(tokenId, price);
+        vm.stopPrank();
 
-    //     // list NFT
-    //     vm.startPrank(seller);
-    //     nftContract.approve(address(nftMarket), tokenId);
-    //     nftMarket.list(tokenId, price);
-    //     vm.stopPrank();
+        // Invalid signature
+        bytes32 whitelistMessageHash = keccak256(
+            abi.encodePacked(whitelistBuyer, tokenId)
+        );
+        (uint8 v1, bytes32 r1, bytes32 s1) = vm.sign(
+            uint256(keccak256(abi.encodePacked("invalidSigner"))),
+            whitelistMessageHash
+        );
+        bytes memory whitelistSignature = abi.encodePacked(r1, s1, v1);
 
-    //     // generate invalid whitelist signature
-    //     bytes32 whitelistMessageHash = keccak256(
-    //         abi.encodePacked(whitelistBuyer, tokenId)
-    //     );
-    //     (uint8 v1, bytes32 r1, bytes32 s1) = vm.sign(
-    //         uint256(keccak256(abi.encodePacked("invalidSigner"))),
-    //         whitelistMessageHash
-    //     );
-    //     bytes memory whitelistSignature = abi.encodePacked(r1, s1, v1);
+        bytes32 permitHash = keccak256(
+            abi.encodePacked(
+                "\x19\x01",
+                tokenPermit.DOMAIN_SEPARATOR(),
+                keccak256(
+                    abi.encode(
+                        keccak256(
+                            "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+                        ),
+                        whitelistBuyer,
+                        address(nftMarket),
+                        price,
+                        tokenPermit.nonces(whitelistBuyer),
+                        deadline
+                    )
+                )
+            )
+        );
+        (uint8 v2, bytes32 r2, bytes32 s2) = vm.sign(
+            whitelistBuyerPrivateKey,
+            permitHash
+        );
 
-    //     // generate ERC2612 permit signature
-    //     bytes32 permitHash = keccak256(
-    //         abi.encodePacked(
-    //             "\x19\x01",
-    //             tokenPermit.DOMAIN_SEPARATOR(),
-    //             keccak256(
-    //                 abi.encode(
-    //                     keccak256(
-    //                         "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    //                     ),
-    //                     whitelistBuyer,
-    //                     address(nftMarket),
-    //                     price,
-    //                     tokenPermit.nonces(whitelistBuyer),
-    //                     deadline
-    //                 )
-    //             )
-    //         )
-    //     );
-
-    //     // sign the permit hash
-    //     (uint8 v2, bytes32 r2, bytes32 s2) = vm.sign(
-    //         whitelistBuyerPrivateKey,
-    //         permitHash
-    //     );
-
-    //     // try to execute permitBuy, should fail
-    //     vm.prank(whitelistBuyer);
-    //     vm.expectRevert(NFTMarket.NotSignedByWhitelistSigner.selector);
-    //     nftMarket.permitBuy(
-    //         tokenId,
-    //         price,
-    //         deadline,
-    //         v2,
-    //         r2,
-    //         s2,
-    //         whitelistSignature
-    //     );
-    // }
+        // execute permitBuy, expect revert
+        vm.prank(whitelistBuyer);
+        vm.expectRevert(NFTMarket.NotSignedByWhitelist.selector);
+        nftMarket.permitBuy(
+            tokenId,
+            price,
+            deadline,
+            v2,
+            r2,
+            s2,
+            whitelistSignature
+        );
+    }
 }
