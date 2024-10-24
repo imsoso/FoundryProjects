@@ -36,6 +36,7 @@ contract NFTMarket is IERC721Receiver {
     error NFTNotForSale();
     error NotTheSeller();
     error NotSignedByWhitelist();
+    error InvalidWhitelistSigner();
 
     // List NFT on the market
     function list(uint256 tokenId, uint256 price) external {
@@ -135,5 +136,12 @@ contract NFTMarket is IERC721Receiver {
         tokenPermit.permit(msg.sender, address(this), price, deadline, v, r, s);
 
         buyNFT(msg.sender, price, tokenId);
+    }
+
+    function setWhitelistSigner(address _whitelistSigner) external {
+        if (_whitelistSigner == address(0)) {
+            revert InvalidWhitelistSigner();
+        }
+        whitelistSigner = _whitelistSigner;
     }
 }
