@@ -37,8 +37,8 @@ contract TokenFactoryV1 {
         tokens[symbol] = TokenInfo(address(newToken), perMint);
     }
 
-    function mintInscription(string memory symbol) external {
-        TokenInfo storage tokenInfo = tokens[symbol];
+    function mintInscription(address tokenAddr) external {
+        TokenInfo storage tokenInfo = tokens[FactoryERC20(tokenAddr).symbol()];
         require(tokenInfo.tokenAddress != address(0), "Token does not exist");
 
         FactoryERC20(tokenInfo.tokenAddress).mint(
