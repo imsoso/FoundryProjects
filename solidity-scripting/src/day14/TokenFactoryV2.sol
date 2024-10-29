@@ -54,8 +54,8 @@ contract TokenFactory is UUPSUpgradeable {
         tokens[symbol] = TokenInfo(tokenAddress, perMint, price);
     }
 
-    function mintInscription(string memory symbol) external payable {
-        TokenInfo storage tokenInfo = tokens[symbol];
+    function mintInscription(address tokenAddr) external payable {
+        TokenInfo storage tokenInfo = tokens[FactoryERC20(tokenAddr).symbol()];
         require(tokenInfo.tokenAddress != address(0), "Token does not exist");
         require(msg.value >= tokenInfo.price, "Insufficient payment");
 
