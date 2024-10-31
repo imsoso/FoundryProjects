@@ -33,6 +33,26 @@ contract NFTMarket is IERC721Receiver {
         tokenPermit = IERC20Permit(_nftToken);
     }
 
+    // custom events
+    event NFTListed(
+        uint256 indexed tokenId,
+        address indexed seller,
+        uint256 price
+    );
+    event NFTSold(
+        uint256 indexed tokenId,
+        address indexed seller,
+        address indexed buyer,
+        uint256 price
+    );
+    event NFTUnlisted(uint256 indexed tokenId);
+    event Refund(address indexed from, uint256 amount);
+    event WhitelistBuy(
+        uint256 indexed tokenId,
+        address indexed buyer,
+        uint256 price
+    );
+
     error NFTNotForSale();
     error NotTheSeller();
     error NotSignedByWhitelist();
@@ -48,6 +68,9 @@ contract NFTMarket is IERC721Receiver {
         // Transfer NFT to the market, make it available for sale
         nftMarket.safeTransferFrom(msg.sender, address(this), tokenId);
         NFTList[tokenId] = NFTProduct({price: price, seller: msg.sender});
+
+        // emit the NFTListed event
+        emit NFTListed(tokenId, msg.sender, price);
     }
     function buyNFT(address buyer, uint256 amount, uint256 nftId) public {
         NFTProduct memory aNFT = NFTList[nftId];
@@ -67,6 +90,8 @@ contract NFTMarket is IERC721Receiver {
 
         nftMarket.transferFrom(address(this), buyer, nftId);
         delete NFTList[nftId];
+
+        emit NFTSold(nftId, aNFT.seller, msg.sender, aNFT.price);
     }
 
     function tokensReceived(
@@ -86,6 +111,7 @@ contract NFTMarket is IERC721Receiver {
         nftMarket.safeTransferFrom(address(this), from, tokenId);
         nftToken.transfer(aNFT.seller, amount);
         delete NFTList[tokenId];
+        emit NFTSold(tokenId, aNFT.seller, msg.sender, aNFT.price);
     }
 
     function onERC721Received(
@@ -136,6 +162,8 @@ contract NFTMarket is IERC721Receiver {
         tokenPermit.permit(msg.sender, address(this), price, deadline, v, r, s);
 
         buyNFT(msg.sender, price, tokenId);
+
+        emit WhitelistBuy(tokenId, msg.sender, price);
     }
 
     function setWhitelistSigner(address _whitelistSigner) external {
