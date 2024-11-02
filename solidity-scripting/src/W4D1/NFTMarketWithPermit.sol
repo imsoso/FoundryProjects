@@ -7,6 +7,7 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 /*
 ➤ 签名 NFT 上架信息
@@ -174,6 +175,57 @@ contract NFTMarketV3 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
         feeTo = to;
 
         emit SetFeeTo(to);
+    }
+
+    function listWithSignature(
+        address nft,
+        uint256 tokenId,
+        address payToken,
+        uint256 price,
+        uint256 deadline,
+        bytes memory signature
+    ) external {
+        require(deadline > block.timestamp, "MKT: deadline is in the past");
+        require(price > 0, "MKT: price is zero");
+        require(
+            payToken == ETH_FLAG || IERC20(payToken).totalSupply() > 0,
+            "MKT: payToken is not valid"
+        );
+        // safe check
+        require(IERC721(nft).ownerOf(tokenId) == msg.sender, "MKT: not owner");
+        require(
+            IERC721(nft).getApproved(tokenId) == address(this) ||
+                IERC721(nft).isApprovedForAll(msg.sender, address(this)),
+            "MKT: not approved"
+        );
+
+        SellOrder memory order = SellOrder({
+            seller: msg.sender,
+            nft: nft,
+            tokenId: tokenId,
+            payToken: payToken,
+            price: price,
+            deadline: deadline
+        });
+
+        bytes32 orderId = keccak256(abi.encode(order));
+        // safe check repeat list
+        require(
+            listingOrders[orderId].seller == address(0),
+            "MKT: order already listed"
+        );
+        address signer;
+        if (order.payToken == ETH_FLAG){
+            signer = ECDSA.recover(MessageHashUtils.toEthSignedMessageHash(orderId), signature); 
+        } else {
+            signer = ECDSA.recover(MessageHashUtils.toTypedDataHash(_domainSeparatorV4(), orderId), signature); 
+        }
+        require(signer == msg.sender, "Invalid signature");
+
+        listingOrders[orderId] = order;
+        _lastIds[nft][tokenId] = orderId; // reset
+
+        emit List(nft, tokenId, orderId, msg.sender, payToken, price, deadline);
     }
 
     event List(
