@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 /*
 编写 IDO 合约，实现 Token 预售，需要实现如下功能：
 
@@ -15,12 +17,16 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 提供 github IDO合约源码链接
 */
 contract MyIDO {
+    mapping(address => uint256) public balances; // user address -> balance
+
+    IERC20 public token;
     uint256 preSalePrice; // Token price in ETH
     uint256 minFunding; // Fundraising target in ETH
     uint256 maxFunding; // Maximum fundraising amount in ETH
     uint256 preSaleDuration; // Campaign duration in seconds
     
-    constructor(uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration) {
+    constructor(IERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration) {
+        token = _token;
         preSalePrice = _preSalePrice;
         minFunding = _minFunding;
         maxFunding = _maxFunding;
