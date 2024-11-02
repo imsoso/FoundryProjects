@@ -228,6 +228,27 @@ contract NFTMarketV3 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
         emit List(nft, tokenId, orderId, msg.sender, payToken, price, deadline);
     }
 
+    function permitBuy( 
+        bytes32 orderId,
+        uint256 amount,
+        uint256 deadline,
+        uint256 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        bytes32 hash = keccak256(abi.encodePacked(msg.sender, orderId, amount, deadline, nonce)); 
+        address signer = ecrecover(hash, v, r, s); 
+        require(signer == msg.sender, "Invalid signature");  
+        SellOrder memory order = listingOrders[orderId];
+        
+        IERC20(order.payToken).transferFrom(msg.sender, address(this), amount);
+        IERC721(order.nft).safeTransferFrom(address(this), msg.sender, order.tokenId);
+
+        emit PermitSold(orderId, msg.sender, signer);
+
+    } 
+
     event List(
         address indexed nft,
         uint256 indexed tokenId,
@@ -239,6 +260,7 @@ contract NFTMarketV3 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
     );
     event Cancel(bytes32 orderId);
     event Sold(bytes32 orderId, address buyer, uint256 fee);
+    event PermitSold(bytes32 orderId, address buyer, address signer);
     event SetFeeTo(address to);
     event SetWhiteListSigner(address signer);
 }
