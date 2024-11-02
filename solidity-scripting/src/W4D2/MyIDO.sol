@@ -15,4 +15,15 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 提供 github IDO合约源码链接
 */
 contract MyIDO {
+    uint256 preSalePrice; // Token price in ETH
+    uint256 minFunding; // Fundraising target in ETH
+    uint256 maxFunding; // Maximum fundraising amount in ETH
+    uint256 preSaleDuration; // Campaign duration in seconds
+    
+    constructor(uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration) {
+        preSalePrice = _preSalePrice;
+        minFunding = _minFunding;
+        maxFunding = _maxFunding;
+        preSaleDuration = _preSaleDuration;
+    }
 }
