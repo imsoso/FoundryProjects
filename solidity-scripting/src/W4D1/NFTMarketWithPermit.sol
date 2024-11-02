@@ -176,36 +176,6 @@ contract NFTMarketV3 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
         emit SetFeeTo(to);
     }
 
-    function _matchMakerOrder(LimitOrder memory order) private {
-        // 1. check
-        require(order.deadline > block.timestamp, "MKT: order expired");
-        require(order.price > 0, "MKT: wrong price");
-
-        byte32 orderId = keccak256(abi.encode(order));
-        // safe check repeat list
-        require(orderMatched[orderId[1]] == 0, "MKT: order already matched");
-        orderMatched[orderId] = true;
-
-        // safe check NFT owner signature
-        address singer = ECDSA.recover(orderId, order.signature);
-        require(singer == order.maker, "MKT: Invalid order signature");
-
-        // transfer NFT
-        IERC721(order.nft).safeTransferFrom(
-            order.maker,
-            msg.sender,
-            order.tokenId
-        );
-
-        // fee 0.3% or 0
-        uint256 fee = feeTo == address(0) ? 0 : (order.price * feeBP) / 10000;
-        // pay token
-        _transferOut(order.payToken, order.maker, order.price - fee);
-        if (fee > 0) _transferOut(order.payToken, feeTo, fee);
-
-        emit LimitOrdermatched(msg.sender, fee, order);
-    }
-
     event List(
         address indexed nft,
         uint256 indexed tokenId,
