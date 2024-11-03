@@ -52,7 +52,7 @@ contract MyIDO {
 
     // Contribute to a campaign for presale
     function contribute() public onlyActive payable {
-        require(msg.value > 0, "Must send ETH");
+        require(msg.value > preSalePrice, "Minimum contribution amount not met");
         currentTotalFunding += msg.value;
         balances[msg.sender] += msg.value;
 
