@@ -17,8 +17,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 提供 github IDO合约源码链接
 */
 contract MyIDO {
-    mapping(address => uint256) public balances; // user address -> balance
+    address public owner;
 
+    mapping(address => uint256) public balances; // user address -> balance
     IERC20 public token;
     uint256 preSalePrice; // Token price in ETH
     uint256 minFunding; // Fundraising target in ETH
@@ -30,6 +31,7 @@ contract MyIDO {
     uint256 preSaleDuration; // Campaign duration in seconds
     
     constructor(IERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration, uint256 _totalSupply) {
+        owner = msg.sender;
         token = _token;
         preSalePrice = _preSalePrice;
         minFunding = _minFunding;
@@ -82,10 +84,20 @@ contract MyIDO {
         emit Refund(msg.sender, balances[msg.sender]);
     }
 
+    function teamWithdrawFunds() public onlySuccess() {
+        require(owner == msg.sender, "Only the project owner can withdraw funds");
+        uint256 totalETH = address(this).balance;
+        uint256 ETHForTeam = totalETH / 10;
+        (bool sent, ) = owner.call{value: ETHForTeam}("");
+        require(sent, "Failed to send Ether");
+
+        emit TeamWithdrawFunds(msg.sender, ETHForTeam);
+    }
     // Event emitted when a user contributes to a campaign
     event Contribution(address indexed user, uint256 amount, uint256 amountLeft);
     // Event emitted when a user claims their tokens
     event TokenClaim(address indexed user, IERC20 token, uint256 amount);
 
     event Refund(address indexed user, uint256 amount);
+    event TeamWithdrawFunds(address indexed user, uint256 amount);
 }
