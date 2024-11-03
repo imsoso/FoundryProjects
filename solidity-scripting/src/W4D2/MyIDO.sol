@@ -23,6 +23,8 @@ contract MyIDO {
     uint256 preSalePrice; // Token price in ETH
     uint256 minFunding; // Fundraising target in ETH
     uint256 maxFunding; // Maximum fundraising amount in ETH
+
+    uint256 deploymentTimestamp; // Use to record contract deployment time
     uint256 preSaleDuration; // Campaign duration in seconds
     
     constructor(IERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration) {
@@ -30,6 +32,12 @@ contract MyIDO {
         preSalePrice = _preSalePrice;
         minFunding = _minFunding;
         maxFunding = _maxFunding;
+        deploymentTimestamp = block.timestamp;
         preSaleDuration = _preSaleDuration;
+    }
+
+    modifier onlyActive {
+        require(block.timestamp < deploymentTimestamp + preSaleDuration, "Project has ended");
+        _;
     }
 }
