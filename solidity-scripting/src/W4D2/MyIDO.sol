@@ -23,6 +23,7 @@ contract MyIDO {
     uint256 preSalePrice; // Token price in ETH
     uint256 minFunding; // Fundraising target in ETH
     uint256 maxFunding; // Maximum fundraising amount in ETH
+    uint256 currentTotalFunding;
 
     uint256 deploymentTimestamp; // Use to record contract deployment time
     uint256 preSaleDuration; // Campaign duration in seconds
@@ -38,6 +39,7 @@ contract MyIDO {
 
     modifier onlyActive {
         require(block.timestamp < deploymentTimestamp + preSaleDuration, "Project has ended");
+        require(currentTotalFunding + msg.value < maxFunding, "Funding limit reached");
         _;
     }
 }
