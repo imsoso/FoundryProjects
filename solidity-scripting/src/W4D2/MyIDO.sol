@@ -50,6 +50,11 @@ contract MyIDO {
         _;
     }
 
+    modifier onlyFailed {
+        require(currentTotalFunding < minFunding, "Funding target reached");
+        _;
+    }
+
     // Contribute to a campaign for presale
     function contribute() public onlyActive payable {
         require(msg.value > preSalePrice, "Minimum contribution amount not met");
@@ -68,8 +73,19 @@ contract MyIDO {
         emit TokenClaim(msg.sender, token, tokenAmount);
     }
 
+    function refund() public onlyFailed {
+        require(balances[msg.sender] > 0, "User has no contributions");
+        (bool sent, ) = msg.sender.call{value: balances[msg.sender]}("");
+        require(sent, "Failed to send Ether");
+        balances[msg.sender] = 0;
+
+        emit Refund(msg.sender, balances[msg.sender]);
+    }
+
     // Event emitted when a user contributes to a campaign
     event Contribution(address indexed user, uint256 amount, uint256 amountLeft);
     // Event emitted when a user claims their tokens
     event TokenClaim(address indexed user, IERC20 token, uint256 amount);
+
+    event Refund(address indexed user, uint256 amount);
 }
