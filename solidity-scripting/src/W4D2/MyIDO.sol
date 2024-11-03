@@ -24,17 +24,19 @@ contract MyIDO {
     uint256 minFunding; // Fundraising target in ETH
     uint256 maxFunding; // Maximum fundraising amount in ETH
     uint256 currentTotalFunding;
+    uint256 totalSupply;
 
     uint256 deploymentTimestamp; // Use to record contract deployment time
     uint256 preSaleDuration; // Campaign duration in seconds
     
-    constructor(IERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration) {
+    constructor(IERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration, uint256 _totalSupply) {
         token = _token;
         preSalePrice = _preSalePrice;
         minFunding = _minFunding;
         maxFunding = _maxFunding;
         deploymentTimestamp = block.timestamp;
         preSaleDuration = _preSaleDuration;
+        totalSupply = _totalSupply;
     }
 
     modifier onlyActive {
@@ -42,6 +44,12 @@ contract MyIDO {
         require(currentTotalFunding + msg.value < maxFunding, "Funding limit reached");
         _;
     }
+
+    modifier onlySuccess {
+        require(currentTotalFunding >= minFunding, "Funding target not reached");
+        _;
+    }
+
     // Contribute to a campaign for presale
     function contribute() public onlyActive payable {
         require(msg.value > 0, "Must send ETH");
@@ -52,7 +60,16 @@ contract MyIDO {
         emit Contribution(msg.sender, msg.value,targetLeft);
     }
 
+    function claimTokens() public onlySuccess {
+        uint256 tokenAmount = totalSupply * balances[msg.sender] / currentTotalFunding;
+        balances[msg.sender] = 0;
+        token.transfer(msg.sender, tokenAmount);
+
+        emit TokenClaim(msg.sender, token, tokenAmount);
+    }
+
     // Event emitted when a user contributes to a campaign
     event Contribution(address indexed user, uint256 amount, uint256 amountLeft);
-
+    // Event emitted when a user claims their tokens
+    event TokenClaim(address indexed user, IERC20 token, uint256 amount);
 }
