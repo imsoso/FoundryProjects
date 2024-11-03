@@ -42,4 +42,17 @@ contract MyIDO {
         require(currentTotalFunding + msg.value < maxFunding, "Funding limit reached");
         _;
     }
+    // Contribute to a campaign for presale
+    function contribute() public onlyActive payable {
+        require(msg.value > 0, "Must send ETH");
+        currentTotalFunding += msg.value;
+        balances[msg.sender] += msg.value;
+
+        uint256 targetLeft = minFunding - currentTotalFunding;
+        emit Contribution(msg.sender, msg.value,targetLeft);
+    }
+
+    // Event emitted when a user contributes to a campaign
+    event Contribution(address indexed user, uint256 amount, uint256 amountLeft);
+
 }
