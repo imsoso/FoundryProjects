@@ -35,7 +35,8 @@ contract StakingPool {
         RNTToken = RNT(_RNTToken);
     }
 
-      function stake(uint256 amount) external {
+    // User can stake their RNT to get rewards
+    function stake(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
         RNTToken.transferFrom(msg.sender, address(this), amount);
         stakedBalances[msg.sender] += amount;
