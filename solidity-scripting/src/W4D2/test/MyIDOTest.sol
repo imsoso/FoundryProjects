@@ -47,7 +47,19 @@ contract MyIDOTest is Test {
         vm.stopPrank();
     }
 
+    function testRefund() public {
+        vm.deal(contributorAlice, 1000 ether);
+        vm.startPrank(contributorAlice);
+        myIDO.contribute{value: 1 ether}();
+    
+        myIDO.refund();
+        uint256 aliceTokenBalance = token.balanceOf(contributorAlice);
+        assertEq(aliceTokenBalance, 0, "Alice token balance should be 0");
 
+        uint256 aliceEthBalance = contributorAlice.balance;
+        assertEq(aliceEthBalance, 1000 ether, "Alice's eth balance should be 1000");
+        vm.stopPrank();
+    }
 
     function testRefundFailed() public {
         vm.deal(contributorAlice, 1000 ether);
