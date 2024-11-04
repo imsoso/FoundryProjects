@@ -52,7 +52,7 @@ contract MyIDO {
     }
 
     modifier onlyFailed {
-        require(currentTotalFunding < minFunding, "Funding target reached");
+        require(currentTotalFunding < minFunding, "Cannot do it, Funding target reached");
         _;
     }
 
