@@ -49,4 +49,12 @@ contract MyIDOTest is Test {
 
 
 
+    function testRefundFailed() public {
+        vm.deal(contributorAlice, 1000 ether);
+        vm.prank(contributorAlice);
+        myIDO.contribute{value: 100 ether}();
+    
+        vm.expectRevert("Cannot do it, Funding target reached");
+        myIDO.refund();
+    }
 }
