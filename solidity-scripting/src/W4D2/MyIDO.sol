@@ -23,7 +23,7 @@ contract MyIDO {
     uint256 preSalePrice; // Token price in ETH
     uint256 minFunding; // Fundraising target in ETH
     uint256 maxFunding; // Maximum fundraising amount in ETH
-    uint256 currentTotalFunding;
+    uint256 public currentTotalFunding;
     uint256 totalSupply;
 
     uint256 deploymentTimestamp; // Use to record contract deployment time
