@@ -51,4 +51,10 @@ contract StakingPool {
         RNTToken.transfer(msg.sender, amount);
     }
 
+    function claim() external {
+        uint256 reward = rewardBalances[msg.sender];
+        require(reward > 0, "No reward to claim");
+        rewardBalances[msg.sender] = 0;
+        esRNTToken.mint(msg.sender, reward);
+    }
 }
