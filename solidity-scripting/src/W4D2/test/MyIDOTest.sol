@@ -25,14 +25,11 @@ contract MyIDOTest is Test {
 
 
     function testContributeSucceed() public {
-        vm.deal(contributorAlice, 1 ether);
+        vm.deal(contributorAlice, 100 ether);
         vm.prank(contributorAlice);
-        (bool callSuccess, ) = contributorAlice.call{value: 0.0001 ether}(
-        abi.encodeWithSignature("contribute()"));
-        require(callSuccess, "Call failed");
-
-       uint256 IDOBalance = myIDO.currentTotalFunding();
-       uint256 aliceContribution = myIDO.balances(contributorAlice);
+        myIDO.contribute{value: 0.01 ether}();
+        uint256 IDOBalance = myIDO.currentTotalFunding();
+        uint256 aliceContribution = myIDO.balances(contributorAlice);
 
         assertEq(IDOBalance, aliceContribution, "Incorrect funding amount");
     }
