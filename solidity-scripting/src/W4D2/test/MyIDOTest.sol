@@ -18,6 +18,8 @@ contract MyIDOTest is Test {
     function setUp() public {
         token = new MyToken("MyToken", "TKN");
         myIDO = new MyIDO(token, 0.0001 ether, 100 ether, 200 ether, 1 weeks, 1000000);
+        // transfer all mint token to IDO contract  
+        token.transfer(address(myIDO), token.balanceOf(address(this)));
 
         contributorAlice = makeAddr("Alice");
         contributorBob = makeAddr("Bob");
@@ -33,4 +35,18 @@ contract MyIDOTest is Test {
 
         assertEq(IDOBalance, aliceContribution, "Incorrect funding amount");
     }
+
+    function testClaimTokens() public {
+        vm.deal(contributorAlice, 1000 ether);
+        vm.startPrank(contributorAlice);
+        myIDO.contribute{value: 100 ether}();
+
+        myIDO.claimTokens();
+        uint256 aliceTokenBalance = token.balanceOf(contributorAlice);
+        assertEq(aliceTokenBalance, 1000000, "Alice token balance should be greater than 0");
+        vm.stopPrank();
+    }
+
+
+
 }
