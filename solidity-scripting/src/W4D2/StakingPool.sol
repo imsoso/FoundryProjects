@@ -43,4 +43,12 @@ contract StakingPool {
         rewardBalances[msg.sender] += amount * REWARD_RATE;
         lockTimes[msg.sender] = block.timestamp + LOCK_PERIOD;
     }
+
+    function unstake(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than 0");
+        require(stakedBalances[msg.sender] >= amount, "Insufficient staked balance");
+        stakedBalances[msg.sender] -= amount;
+        RNTToken.transfer(msg.sender, amount);
+    }
+
 }
