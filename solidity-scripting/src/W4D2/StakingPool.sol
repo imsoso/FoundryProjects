@@ -16,6 +16,30 @@ esRNT 是锁仓性的RNT，
 */
 pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "./erRNT.sol";
+import "./RNT.sol";
 
 contract StakingPool {
+    esRNT public esRNTToken;
+    RNT public RNTToken;
+
+    uint256 public constant REWARD_RATE = 1; // 1 RNT per day
+    uint256 public constant LOCK_PERIOD = 30 days;
+
+    mapping(address => uint256) public stakedBalances;
+    mapping(address => uint256) public rewardBalances;
+    mapping(address => uint256) public lockTimes;
+
+    constructor(address _esRNTToken, address _RNTToken) {
+        esRNTToken = esRNT(_esRNTToken);
+        RNTToken = RNT(_RNTToken);
+    }
+
+      function stake(uint256 amount) external {
+        require(amount > 0, "Amount must be greater than 0");
+        RNTToken.transferFrom(msg.sender, address(this), amount);
+        stakedBalances[msg.sender] += amount;
+        rewardBalances[msg.sender] += amount * REWARD_RATE;
+        lockTimes[msg.sender] = block.timestamp + LOCK_PERIOD;
+    }
 }
