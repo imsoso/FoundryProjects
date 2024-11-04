@@ -69,4 +69,19 @@ contract MyIDOTest is Test {
         vm.expectRevert("Cannot do it, Funding target reached");
         myIDO.refund();
     }
+
+    function testTeamWithdraw()  public  payable{
+        vm.deal(contributorAlice, 1000 ether);
+        vm.prank(contributorAlice);
+        myIDO.contribute{value: 100 ether}();
+
+        vm.deal(address(this), 0);
+        myIDO.teamWithdrawFunds();
+        uint256 teamEthBalance = address(this).balance;
+        assertEq(teamEthBalance, 10 ether, "Team's eth balance should be 10");
+    }
+
+    receive() external payable {
+
+    }
 }
