@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /*
 编写 IDO 合约，实现 Token 预售，需要实现如下功能：
@@ -20,7 +19,7 @@ contract MyIDO {
     address public owner;
 
     mapping(address => uint256) public balances; // user address -> balance
-    IERC20 public token;
+    ERC20 public token;
     uint256 preSalePrice; // Token price in ETH
     uint256 minFunding; // Fundraising target in ETH
     uint256 maxFunding; // Maximum fundraising amount in ETH
@@ -30,7 +29,7 @@ contract MyIDO {
     uint256 deploymentTimestamp; // Use to record contract deployment time
     uint256 preSaleDuration; // Campaign duration in seconds
     
-    constructor(IERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration, uint256 _totalSupply) {
+    constructor(ERC20 _token, uint256 _preSalePrice, uint256 _minFunding, uint256 _maxFunding, uint256 _preSaleDuration, uint256 _totalSupply) {
         owner = msg.sender;
         token = _token;
         preSalePrice = _preSalePrice;
@@ -96,7 +95,7 @@ contract MyIDO {
     // Event emitted when a user contributes to a campaign
     event Contribution(address indexed user, uint256 amount, uint256 amountLeft);
     // Event emitted when a user claims their tokens
-    event TokenClaim(address indexed user, IERC20 token, uint256 amount);
+    event TokenClaim(address indexed user, ERC20 token, uint256 amount);
 
     event Refund(address indexed user, uint256 amount);
     event TeamWithdrawFunds(address indexed user, uint256 amount);
