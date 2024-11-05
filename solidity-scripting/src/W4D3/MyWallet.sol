@@ -4,7 +4,7 @@ pragma solidity >=0.8.20;
 
 contract MyWallet {
     string public name;
-    mapping (address => bool) public privateapproved;
+    mapping (address => bool) private approved;
     address public owner;
 
     modifier auth {
