@@ -18,7 +18,10 @@ contract MyWallet {
 
     constructor(string memory _name) {
         name = _name;
-        owner = msg.sender;
+        
+        assembly {
+            sstore(0, caller())
+        }
     }
 
     function transferOwnership(address _addr) public auth {
