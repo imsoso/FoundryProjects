@@ -27,6 +27,8 @@ contract MyWallet {
     function transferOwnership(address _addr) public auth {
         require(_addr != address(0), "New owner is the zero address");
         require(owner != _addr, "New owner is the same as the old owner");
-        owner = _addr;
+        assembly {
+            sstore(0, _addr)
+        }
     }
 }
