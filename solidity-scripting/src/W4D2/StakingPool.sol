@@ -26,9 +26,13 @@ contract StakingPool {
     uint256 public constant REWARD_RATE = 1; // 1 RNT per day
     uint256 public constant LOCK_PERIOD = 30 days;
 
-    mapping(address => uint256) public stakedBalances;
-    mapping(address => uint256) public rewardBalances;
-    mapping(address => uint256) public lockTimes;
+    struct StakeInfo {
+        uint256 staked;
+        uint256 unclaimed;
+        uint256 lastUpdateTime;
+    }
+    mapping(address => StakeInfo) public stakeInfos;
+
 
     constructor(address _esRNTToken, address _RNTToken) {
         esRNTToken = esRNT(_esRNTToken);
@@ -39,9 +43,15 @@ contract StakingPool {
     function stake(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
         RNTToken.transferFrom(msg.sender, address(this), amount);
-        stakedBalances[msg.sender] += amount;
-        rewardBalances[msg.sender] += amount * REWARD_RATE;
-        lockTimes[msg.sender] = block.timestamp + LOCK_PERIOD;
+
+
+        stakeInfos[msg.sender].unclaimed += getRewardAmount(msg.sender);
+        // Stacked must calculate after getRewardAmount is called 
+        // because it base on the old staked amount
+        stakeInfos[msg.sender].staked += amount;
+        stakeInfos[msg.sender].lastUpdateTime = block.timestamp;
+
+        esRNT.locks.push(esRNT.LockInfo(address(msg.sender), block.timestamp, amount));
     }
 
     function unstake(uint256 amount) external {
