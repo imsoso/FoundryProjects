@@ -52,9 +52,15 @@ contract StakingPool {
 
     function unstake(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
-        require(stakedBalances[msg.sender] >= amount, "Insufficient staked balance");
-        stakedBalances[msg.sender] -= amount;
-        RNTToken.transfer(msg.sender, amount);
+        require(stakeInfos[msg.sender].staked >= amount, "Insufficient staked balance");
+
+        // We still calculate reward amount for the user
+        // because time elapsed before unstake
+        stakeInfos[msg.sender].unclaimed += getRewardAmount(msg.sender);
+        // Stacked must calculate after getRewardAmount is called 
+        // because it base on the old staked amount
+        stakeInfos[msg.sender].staked -= amount;
+        stakeInfos[msg.sender].lastUpdateTime = block.timestamp;
     }
 
     function claim() external {
