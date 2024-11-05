@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-
+//重新修改 MyWallet 合约的 transferOwernship 和 auth 逻辑，使用内联汇编方式来 set和get owner 地址
 pragma solidity >=0.8.20;
 
 contract MyWallet {
