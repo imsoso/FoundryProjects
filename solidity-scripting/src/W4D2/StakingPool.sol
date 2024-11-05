@@ -42,16 +42,12 @@ contract StakingPool {
     // User can stake their RNT to get rewards
     function stake(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
-        RNTToken.transferFrom(msg.sender, address(this), amount);
-
 
         stakeInfos[msg.sender].unclaimed += getRewardAmount(msg.sender);
         // Stacked must calculate after getRewardAmount is called 
         // because it base on the old staked amount
         stakeInfos[msg.sender].staked += amount;
         stakeInfos[msg.sender].lastUpdateTime = block.timestamp;
-
-        esRNT.locks.push(esRNT.LockInfo(address(msg.sender), block.timestamp, amount));
     }
 
     function unstake(uint256 amount) external {
