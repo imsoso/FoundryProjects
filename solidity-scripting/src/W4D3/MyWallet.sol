@@ -8,7 +8,11 @@ contract MyWallet {
     address public owner;
 
     modifier auth {
-        require(msg.sender == owner,"Not authorized");
+        address currentOwner;
+        assembly {
+            currentOwner := sload(0)
+        }
+        require(msg.sender == currentOwner,"Not authorized");
         _;
     }
 
