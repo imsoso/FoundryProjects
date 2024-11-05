@@ -13,6 +13,12 @@ import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract esRNT is ERC20Burnable {
+
+    struct LockInfo {
+        uint256 amount;
+        uint256 lockTime;
+    }
+    mapping(address => LockInfo[]) public lockInfos;
     constructor(
         string memory name_,
         string memory symbol_
@@ -20,7 +26,12 @@ contract esRNT is ERC20Burnable {
         _mint(msg.sender, 1e10 * 1e18);
     }
 
-    function mint(address to, uint256 amount) external {
+    function mint(address to, uint256 amount) external {        
         _mint(to, amount);
+        lockInfos[to].push(LockInfo({ amount: amount, lockTime: block.timestamp }));
+        emit TokenLocked(to, amount, block.timestamp);
     }
+
+    // events
+    event TokenLocked(address indexed user, uint256 amount, uint256 lockTime);
 }
