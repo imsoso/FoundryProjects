@@ -4,23 +4,23 @@ pragma solidity >=0.8.20;
 
 contract MyWallet {
     string public name;
-    mapping (address => bool) private approved;
+    mapping(address => bool) private approved;
     address public owner;
 
-    modifier auth {
+    modifier auth() {
         address currentOwner;
         assembly {
-            currentOwner := sload(0)
+            currentOwner := sload(2)
         }
-        require(msg.sender == currentOwner,"Not authorized");
+        require(msg.sender == currentOwner, "Not authorized");
         _;
     }
 
     constructor(string memory _name) {
         name = _name;
-        
+
         assembly {
-            sstore(0, caller())
+            sstore(2, caller())
         }
     }
 
@@ -28,7 +28,7 @@ contract MyWallet {
         require(_addr != address(0), "New owner is the zero address");
         require(owner != _addr, "New owner is the same as the old owner");
         assembly {
-            sstore(0, _addr)
+            sstore(2, _addr)
         }
     }
 }
