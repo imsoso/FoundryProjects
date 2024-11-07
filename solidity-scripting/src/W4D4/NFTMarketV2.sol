@@ -215,10 +215,16 @@ contract NFTMarketV2 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
             "MKT: order already listed"
         );
         address signer;
-        if (order.payToken == ETH_FLAG){
-            signer = ECDSA.recover(MessageHashUtils.toEthSignedMessageHash(orderId), signature); 
+        if (order.payToken == ETH_FLAG) {
+            signer = ECDSA.recover(
+                MessageHashUtils.toEthSignedMessageHash(orderId),
+                signature
+            );
         } else {
-            signer = ECDSA.recover(MessageHashUtils.toTypedDataHash(_domainSeparatorV4(), orderId), signature); 
+            signer = ECDSA.recover(
+                MessageHashUtils.toTypedDataHash(_domainSeparatorV4(), orderId),
+                signature
+            );
         }
         require(signer == msg.sender, "Invalid signature");
 
@@ -228,7 +234,7 @@ contract NFTMarketV2 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
         emit List(nft, tokenId, orderId, msg.sender, payToken, price, deadline);
     }
 
-    function permitBuy( 
+    function permitBuy(
         bytes32 orderId,
         uint256 amount,
         uint256 deadline,
@@ -237,17 +243,22 @@ contract NFTMarketV2 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
         bytes32 r,
         bytes32 s
     ) external {
-        bytes32 hash = keccak256(abi.encodePacked(msg.sender, orderId, amount, deadline, nonce)); 
-        address signer = ecrecover(hash, v, r, s); 
-        require(signer == msg.sender, "Invalid signature");  
+        bytes32 hash = keccak256(
+            abi.encodePacked(msg.sender, orderId, amount, deadline, nonce)
+        );
+        address signer = ecrecover(hash, v, r, s);
+        require(signer == msg.sender, "Invalid signature");
         SellOrder memory order = listingOrders[orderId];
-        
+
         IERC20(order.payToken).transferFrom(msg.sender, address(this), amount);
-        IERC721(order.nft).safeTransferFrom(address(this), msg.sender, order.tokenId);
+        IERC721(order.nft).safeTransferFrom(
+            address(this),
+            msg.sender,
+            order.tokenId
+        );
 
         emit PermitSold(orderId, msg.sender, signer);
-
-    } 
+    }
 
     event List(
         address indexed nft,
