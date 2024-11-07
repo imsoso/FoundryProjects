@@ -14,3 +14,4 @@ docs/
 .env
 solidity-scripting/broadcast/NFT.s.sol/11155111/run-1729150106.json
 solidity-scripting/broadcast/NFT.s.sol/11155111/run-latest.json
+solidity-scripting/node_modules/
