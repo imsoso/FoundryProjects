@@ -4,8 +4,14 @@ out = "out"
 libs = ["lib"]
 solc = "0.8.20"
 
+build_info = true
+ffi=true
+extra_output = ["storageLayout"]
+fs_permissions = [{ access = "read-write", path = "./out/"}]
+
 [rpc_endpoints]
 sepolia = "${SEPOLIA_RPC_URL}"
+local = "http://127.0.0.1:8545"
 
 [etherscan]
 sepoliaKey = { key = "${ETHERSCAN_API_KEY}" }
