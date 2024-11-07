@@ -8,7 +8,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 /*
 ➤ 签名 NFT 上架信息
 ➤ 使⽤离线签名和验证存储NFT上架， 展⽰最新的 NFT 上架清单
@@ -16,7 +16,11 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 ➤ Option：在TheGraph中记录NFT记录，并在⽹页中展⽰NFT交易动态
 */
 
-contract NFTMarketV2 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
+contract NFTMarketV2 is
+    Ownable(msg.sender),
+    EIP712("OpenSpaceNFTMarket", "1"),
+    Initializable
+{
     address public constant ETH_FLAG =
         address(0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE);
     uint256 public constant feeBP = 30; // 30/10000 = 0.3%
@@ -32,6 +36,18 @@ contract NFTMarketV2 is Ownable(msg.sender), EIP712("OpenSpaceNFTMarket", "1") {
         address payToken;
         uint256 price;
         uint256 deadline;
+    }
+
+    // State variables
+    address public implAddress; // Implementation address for clone
+
+    function initialize(address owner_) public initializer {
+        _transferOwnership(owner_);
+    }
+
+    //only owner can set implAddress
+    function setImplAddress(address _implAddress) public onlyOwner {
+        implAddress = _implAddress;
     }
 
     function listing(
