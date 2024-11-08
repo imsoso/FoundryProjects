@@ -6,4 +6,17 @@ pragma solidity ^0.8.20;
 2. 在 Bank 合约里记录了每个地址的存款金额
 3. 使用可迭代的链表保存存款金额的前 10 名用户
 */
-contract BankMappingList {}
+contract BankMappingList {
+    event Deposit(address indexed sender, uint256 amount);
+
+    mapping(address => uint) public balances;
+
+    receive() external payable {
+        balances[msg.sender] += msg.value;
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
+    }
+}
