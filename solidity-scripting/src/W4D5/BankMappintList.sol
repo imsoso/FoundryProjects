@@ -11,6 +11,14 @@ contract BankMappingList {
 
     mapping(address => uint) public balances;
 
+    mapping(address => address) _nextDepositor;
+    uint public depositorCount;
+    address constant GUARD = address(1);
+
+    constructor() {
+        _nextDepositor[GUARD] = GUARD;
+    }
+
     receive() external payable {
         balances[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
