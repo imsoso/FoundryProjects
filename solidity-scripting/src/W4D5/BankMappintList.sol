@@ -27,4 +27,8 @@ contract BankMappingList {
     function getBalance() public view returns (uint256) {
         return address(this).balance;
     }
+
+    function existDepositor(address depositor) public view returns (bool) {
+        return _nextDepositor[depositor] != address(0);
+    }
 }
