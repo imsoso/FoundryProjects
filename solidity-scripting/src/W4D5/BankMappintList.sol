@@ -31,4 +31,12 @@ contract BankMappingList {
     function existDepositor(address depositor) public view returns (bool) {
         return _nextDepositor[depositor] != address(0);
     }
+
+    function addDepositor(address depositor) public {
+        require(!existDepositor(depositor), "Depositor already exists");
+
+        _nextDepositor[depositor] = _nextDepositor[GUARD];
+        _nextDepositor[GUARD] = depositor;
+        depositorCount++;
+    }
 }
