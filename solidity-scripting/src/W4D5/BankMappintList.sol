@@ -58,4 +58,15 @@ contract BankMappingList {
         balances[depositor] = 0;
         depositorCount--;
     }
+
+    function getTop(uint256 k) public view returns (address[] memory) {
+        require(k <= depositorCount);
+        address[] memory depositorLists = new address[](k);
+        address currentAddress = _nextDepositor[GUARD];
+        for (uint256 i = 0; i < k; ++i) {
+            depositorLists[i] = currentAddress;
+            currentAddress = _nextDepositor[currentAddress];
+        }
+        return depositorLists;
+    }
 }
