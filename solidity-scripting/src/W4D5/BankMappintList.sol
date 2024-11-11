@@ -28,18 +28,11 @@ contract BankMappingList {
         return address(this).balance;
     }
 
-    function _isPreviousDepositor(
-        address depositor,
-        address previousDepositor
-    ) internal view returns (bool) {
+    function _isPreviousDepositor(address depositor, address previousDepositor) internal view returns (bool) {
         return _nextDepositor[previousDepositor] == depositor;
     }
 
-    function _verifyOrder(
-        address prevDepositor,
-        uint256 newValue,
-        address nextDepositor
-    ) internal view {
+    function _verifyIndexDescending(address prevDepositor, uint256 newValue, address nextDepositor) internal view {
         return
             (prevDepositor == GUARD || balances[prevDepositor] >= newValue) &&
             (nextDepositor == GUARD || newValue >= balances[nextDepositor]);
