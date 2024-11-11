@@ -32,10 +32,8 @@ contract BankMappingList {
         return _nextDepositor[previousDepositor] == depositor;
     }
 
-    function _verifyIndexDescending(address prevDepositor, uint256 newValue, address nextDepositor) internal view {
-        return
-            (prevDepositor == GUARD || balances[prevDepositor] >= newValue) &&
-            (nextDepositor == GUARD || newValue >= balances[nextDepositor]);
+    function _verifyIndexDescending(address prevDepositor, uint256 newValue, address nextDepositor) internal view returns (bool) {
+        (prevDepositor == GUARD || balances[prevDepositor] >= newValue) && (nextDepositor == GUARD || newValue >= balances[nextDepositor]);
     }
 
     function addDepositorDescending(address depositor, uint256 balance, address candidateDepositor) public {
