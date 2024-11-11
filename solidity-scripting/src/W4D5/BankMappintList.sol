@@ -46,4 +46,16 @@ contract BankMappingList {
         _nextDepositor[candidateDepositor] = depositor;
         depositorCount++;
     }
+
+    function _previousDepositorExist(address depositor, address prevDepositor) internal view returns (bool) {
+        return _nextDepositor[prevDepositor] == depositor;
+    }
+    function removeDepositor(address depositor, address candidateStudent) public {
+        require(_nextDepositor[depositor] != address(0), 'Depositor does not exist');
+        require(_previousDepositorExist(depositor, candidateStudent), 'Candidate depositor does not exist');
+        _nextDepositor[candidateStudent] = _nextDepositor[depositor];
+        _nextDepositor[depositor] = address(0);
+        balances[depositor] = 0;
+        depositorCount--;
+    }
 }
