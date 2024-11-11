@@ -38,11 +38,14 @@ contract BankMappingList {
             (nextDepositor == GUARD || newValue >= balances[nextDepositor]);
     }
 
-    function addDepositor(address depositor) public {
-        require(!existDepositor(depositor), "Depositor already exists");
+    function addDepositorDescending(address depositor, uint256 balance, address candidateDepositor) public {
+        require(_nextDepositor[depositor] == address(0), 'Depositor already exists');
+        require(_nextDepositor[candidateDepositor] != address(0), 'Candidate depositor does not exist');
+        require(_verifyIndexDescending(candidateDepositor, balance, _nextDepositor[candidateDepositor]), 'Invalid balance');
 
-        _nextDepositor[depositor] = _nextDepositor[GUARD];
-        _nextDepositor[GUARD] = depositor;
+        balances[depositor] = balance;
+        _nextDepositor[depositor] = _nextDepositor[candidateDepositor];
+        _nextDepositor[candidateDepositor] = depositor;
         depositorCount++;
     }
 }
