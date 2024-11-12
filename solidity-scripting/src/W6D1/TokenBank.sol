@@ -20,10 +20,17 @@ contract TokenBank is AutomationCompatibleInterface {
 
     mapping(address => uint) internal balances;
 
-    constructor(address _token) {
+    // add interval control
+    uint256 public immutable interval;
+    uint256 public lastTimeStamp;
+
+    constructor(address _token, uint256 refreshInterval) {
         admin = msg.sender;
         token = IERC20(_token);
         tokenPermit = SosoToken2621(_token);
+
+        interval = refreshInterval;
+        lastTimeStamp = block.timestamp;
     }
 
     // 提取函数：用户提取自己的 token，管理员可以提取所有 token
@@ -63,5 +70,23 @@ contract TokenBank is AutomationCompatibleInterface {
         tokenPermit.permit(msg.sender, address(this), amount, deadline, v, r, s);
 
         deposit(amount);
+    }
+
+    // chainlink Automation checkUpkeep
+    function checkUpkeep(bytes calldata checkData) external view override returns (bool upkeepNeeded, bytes memory performData) {
+        bool timePassed = (block.timestamp - lastTimeStamp) > interval;
+
+        uint256 threshold = 1 ether;
+        bool balanceReachThreshold = address(this).balance > threshold;
+        upkeepNeeded = timePassed && balanceReachThreshold;
+    }
+
+    function performUpkeep(bytes calldata performData) external override {
+        lastTimeStamp = block.timestamp;
+
+        uint256 amountToTransfer = address(this).balance / 2;
+
+        (bool success, ) = admin.call{ value: amountToTransfer }('');
+        require(success, 'Failed to transfer to admin');
     }
 }
