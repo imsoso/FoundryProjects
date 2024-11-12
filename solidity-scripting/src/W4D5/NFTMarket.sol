@@ -264,7 +264,7 @@ contract NFTMarket is Ownable {
     }
 
     // verify the whitelist using Merkle Tree
-    function verifyWhitelistWithMerkleTree(address user, bytes32[] calldata proof, bytes32 merkleRoot) internal view returns (bool) {
+    function verifyWhitelistWithMerkleTree(address user, bytes32[] calldata proof, bytes32 merkleRoot) internal pure returns (bool) {
         // calculate the leaf node hash
         bytes32 leaf = keccak256(abi.encodePacked(user));
 
