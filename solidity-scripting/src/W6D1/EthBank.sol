@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import { AutomationCompatibleInterface } from './AutomationCompatibleInterface.sol';
+import { Address } from '@openzeppelin/contracts/utils/Address.sol';
 
 contract ETHBank is AutomationCompatibleInterface {
     address admin;
@@ -13,6 +14,7 @@ contract ETHBank is AutomationCompatibleInterface {
     uint256 public lastTimeStamp;
 
     error DepositCanotBeZero();
+    error AdminWithdrawOnly();
 
     constructor(address _admin, uint256 refreshInterval) {
         admin = _admin;
@@ -33,6 +35,15 @@ contract ETHBank is AutomationCompatibleInterface {
             revert DepositCanotBeZero();
         }
         balances[msg.sender] += msg.value;
+    }
+    function withdraw(uint256 amount) external {
+        // Revert if caller is not admin
+        if (msg.sender != admin) {
+            revert AdminWithdrawOnly();
+        }
+        if (amount != 0) {
+            Address.sendValue(payable(admin), amount);
+        }
     }
 
     // chainlink Automation checkUpkeep
