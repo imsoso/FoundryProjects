@@ -39,7 +39,7 @@ contract NFTMarket is Ownable {
     error NotSignedByWhitelistSigner();
     error PermitNotSupported();
     error InvalidWhitelistSigner();
-    error NotWhitelistedInMerkleTree();
+    error NotInWhiteList();
 
     // custom events
     event NFTListed(uint256 indexed tokenId, address indexed seller, uint256 price);
@@ -48,6 +48,7 @@ contract NFTMarket is Ownable {
     event Refund(address indexed from, uint256 amount);
     event WhitelistBuy(uint256 indexed tokenId, address indexed buyer, uint256 price);
     event PermitPrePay(uint256 amount, uint256 deadline);
+    event ClaimNFT(address indexed buyer, uint256 indexed tokenId, uint256 amount);
 
     // custom structs
     struct Listing {
@@ -231,7 +232,7 @@ contract NFTMarket is Ownable {
         // emit the WhitelistBuy event
         emit WhitelistBuy(tokenId, msg.sender, price);
     }
-    
+
     // Use token permit to authorize
     function permitPrePay(uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
         // make sure the payment token supports permit
@@ -243,6 +244,25 @@ contract NFTMarket is Ownable {
 
         emit PermitPrePay(amount, deadline);
     }
+
+    // use merkle tree to verify whitelist and permit to prepay and buy nft
+    function claimNFT(uint256 tokenId, bytes32[] calldata proof, bytes32 merkleRoot) external {
+        // verify if the user is in the whitelist
+        if (!verifyWhitelistWithMerkleTree(msg.sender, proof, merkleRoot)) {
+            revert NotInWhiteList();
+        }
+        // use permit to prepay 100 token
+        uint256 amount = 100;
+        Listing memory listing = listings[tokenId];
+        // transfer 100 tokens to the seller
+        SafeTransferLib.safeTransferFrom(address(paymentToken), msg.sender, listing.seller, amount);
+
+        // transfer out the NFT
+        _safeTransferFromSellerToBuyer(tokenId, msg.sender);
+
+        emit ClaimNFT(msg.sender, tokenId, amount);
+    }
+
     // verify the whitelist using Merkle Tree
     function verifyWhitelistWithMerkleTree(address user, bytes32[] calldata proof, bytes32 merkleRoot) internal view returns (bool) {
         // calculate the leaf node hash
