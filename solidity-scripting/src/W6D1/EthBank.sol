@@ -47,7 +47,7 @@ contract ETHBank is AutomationCompatibleInterface {
     }
 
     // chainlink Automation checkUpkeep
-    function checkUpkeep(bytes calldata checkData) external view override returns (bool upkeepNeeded, bytes memory performData) {
+    function checkUpkeep(bytes calldata) external view override returns (bool upkeepNeeded, bytes memory) {
         bool timePassed = (block.timestamp - lastTimeStamp) > interval;
 
         uint256 threshold = 0.0001 ether;
@@ -55,12 +55,10 @@ contract ETHBank is AutomationCompatibleInterface {
         upkeepNeeded = timePassed && balanceReachThreshold;
     }
 
-    function performUpkeep(bytes calldata performData) external override {
+    function performUpkeep(bytes calldata) external override {
         lastTimeStamp = block.timestamp;
 
         uint256 amountToTransfer = address(this).balance / 2;
-
-        (bool success, ) = admin.call{ value: amountToTransfer }('');
-        require(success, 'Failed to transfer to admin');
+        Address.sendValue(payable(admin), amountToTransfer);
     }
 }
