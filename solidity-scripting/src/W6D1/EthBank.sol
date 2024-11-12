@@ -12,6 +12,8 @@ contract ETHBank is AutomationCompatibleInterface {
     uint256 public immutable interval;
     uint256 public lastTimeStamp;
 
+    error DepositCanotBeZero();
+
     constructor(address _admin, uint256 refreshInterval) {
         admin = _admin;
 
@@ -23,6 +25,14 @@ contract ETHBank is AutomationCompatibleInterface {
     receive() external payable {
         // Call deposit function
         deposit();
+    }
+
+    function deposit() public payable {
+        // Revert if deposit amount is 0
+        if (msg.value == 0) {
+            revert DepositCanotBeZero();
+        }
+        balances[msg.sender] += msg.value;
     }
 
     // 提取函数：用户提取自己的 token，管理员可以提取所有 token
