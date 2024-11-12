@@ -19,6 +19,12 @@ contract ETHBank is AutomationCompatibleInterface {
         lastTimeStamp = block.timestamp;
     }
 
+    // Receive ETH
+    receive() external payable {
+        // Call deposit function
+        deposit();
+    }
+
     // 提取函数：用户提取自己的 token，管理员可以提取所有 token
     function withdraw(uint256 amount) public {
         if (msg.sender == admin) {
