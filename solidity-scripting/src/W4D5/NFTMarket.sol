@@ -18,8 +18,9 @@ import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import '@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol';
 import '@solady/utils/SafeTransferLib.sol';
 import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
+import '@openzeppelin/contracts/utils/Multicall.sol';
 
-contract NFTMarket is Ownable {
+contract NFTMarket is Ownable, Multicall {
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
