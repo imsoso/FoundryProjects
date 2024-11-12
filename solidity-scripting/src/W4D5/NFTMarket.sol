@@ -17,6 +17,7 @@ import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import '@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol';
 import '@solady/utils/SafeTransferLib.sol';
+import '@openzeppelin/contracts/utils/cryptography/MerkleProof.sol';
 
 contract NFTMarket is Ownable {
     using ECDSA for bytes32;
@@ -241,5 +242,13 @@ contract NFTMarket is Ownable {
         paymentTokenPermit.permit(msg.sender, address(this), amount, deadline, v, r, s);
 
         emit PermitPrePay(amount, deadline);
+    }
+    // verify the whitelist using Merkle Tree
+    function verifyWhitelistWithMerkleTree(address user, bytes32[] calldata proof, bytes32 merkleRoot) internal view returns (bool) {
+        // calculate the leaf node hash
+        bytes32 leaf = keccak256(abi.encodePacked(user));
+
+        // verify if the user is in the whitelist
+        return MerkleProof.verify(proof, merkleRoot, leaf);
     }
 }
