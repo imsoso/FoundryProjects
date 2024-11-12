@@ -13,3 +13,6 @@
 [submodule "solidity-scripting/lib/openzeppelin-contracts-upgradeable"]
 	path = solidity-scripting/lib/openzeppelin-contracts-upgradeable
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+[submodule "solidity-scripting/lib/solady"]
+	path = solidity-scripting/lib/solady
+	url = https://github.com/vectorized/solady
