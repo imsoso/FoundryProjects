@@ -46,6 +46,7 @@ contract NFTMarket is Ownable {
     event NFTUnlisted(uint256 indexed tokenId);
     event Refund(address indexed from, uint256 amount);
     event WhitelistBuy(uint256 indexed tokenId, address indexed buyer, uint256 price);
+    event PermitPrePay(uint256 amount, uint256 deadline);
 
     // custom structs
     struct Listing {
@@ -228,5 +229,17 @@ contract NFTMarket is Ownable {
 
         // emit the WhitelistBuy event
         emit WhitelistBuy(tokenId, msg.sender, price);
+    }
+    
+    // Use token permit to authorize
+    function permitPrePay(uint256 amount, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external {
+        // make sure the payment token supports permit
+        if (!supportsPermit) {
+            revert PermitNotSupported();
+        }
+
+        paymentTokenPermit.permit(msg.sender, address(this), amount, deadline, v, r, s);
+
+        emit PermitPrePay(amount, deadline);
     }
 }
