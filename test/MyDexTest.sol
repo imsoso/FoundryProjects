@@ -41,3 +41,25 @@ contract MyDexTest is Test {
         RNT = IERC20(address(new RNTToken()));
         myDex = new MyDex(address(uniswapV2Router));
     }
+
+    function _addLiquidityETH10_RNT1000() private returns (uint amountA, uint amountB, uint liquidity) {
+        // Approve tokens
+        WETH.deposit{ value: 20 ether }();
+        RNT.approve(address(uniswapV2Router), 1000 ether);
+        WETH.approve(address(uniswapV2Router), 10 ether);
+
+        tokenWETH = address(WETH);
+        tokenRNT = address(RNT);
+
+        // Add liquidity
+        (amountA, amountB, liquidity) = uniswapV2Router.addLiquidity(
+            tokenWETH,
+            tokenRNT,
+            10 ether,
+            1000 ether,
+            0,
+            0,
+            address(this),
+            block.timestamp
+        );
+    }
