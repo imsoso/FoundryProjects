@@ -95,4 +95,28 @@ contract MyDexTest is Test {
         console.log('finalBalance:', finalBalance);
         assertGe(finalBalance, balanceBeforeBuyETH + minBuyAmount);
     }
+
+    function testSellETHForRNT() public {
+        // Add liquidity
+        _addLiquidityETH10_RNT1000();
+
+        uint256 balanceRNTBeforeSellETH = RNT.balanceOf(address(this));
+        console.log('balanceRNTBeforeSellETH:', balanceRNTBeforeSellETH);
+
+        address[] memory path = new address[](2);
+        path[0] = address(WETH);
+        path[1] = address(RNT);
+        
+        // amounts[0] => ETH, amounts[1] => RNT
+        uint256[] memory amounts = uniswapV2Router.getAmountsOut(1 ether, path);
+        assertTrue(amounts[amounts.length - 1] > amounts[0]);
+        uint256 minBuyAmount = amounts[amounts.length - 1];
+
+        // sell ETH
+        myDex.sellETH{ value: 1 ether }(address(RNT), minBuyAmount);
+
+        // Check if the balance of RNT has increased
+        uint256 finalBalance = RNT.balanceOf(address(this));
+        assertEq(finalBalance, balanceRNTBeforeSellETH + minBuyAmount);
+    }
 }
