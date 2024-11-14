@@ -4,4 +4,13 @@ out = "out"
 libs = ["lib"]
 solc = "0.8.20"
 
+build_info = true
+ffi=true
+
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+local = "http://127.0.0.1:8545"
+
+[etherscan]
+sepoliaKey = { key = "${ETHERSCAN_API_KEY}" }
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
