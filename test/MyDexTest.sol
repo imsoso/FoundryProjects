@@ -63,3 +63,36 @@ contract MyDexTest is Test {
             block.timestamp
         );
     }
+
+    function testBuyETHWithRNT() public {
+        _addLiquidityETH10_RNT1000();
+
+        // Approve and deposit tokens
+        uint256 sellAmount = 1 ether;
+        RNT.approve(address(myDex), sellAmount);
+
+        address[] memory path = new address[](2);
+        path[0] = address(RNT);
+        path[1] = address(WETH);
+
+        uint[] memory amountOuts = uniswapV2Router.getAmountsOut(sellAmount, path);
+
+        // amounts[1] is WETH amountOut which should be greater than 0
+        assertTrue(amountOuts[amountOuts.length - 1] > 0);
+
+        // get balance before buy eth
+        uint256 balanceBeforeBuyETH = address(this).balance;
+        console.log('balanceBeforeBuyETH:', balanceBeforeBuyETH);
+
+        // with slippage
+        uint256 minBuyAmount = (amountOuts[amountOuts.length - 1] * 99) / 100;
+
+        // Buy ETH
+        myDex.buyETH(address(RNT), sellAmount, minBuyAmount);
+
+        // Check if the balance of the contract has increased
+        uint256 finalBalance = address(this).balance;
+        console.log('finalBalance:', finalBalance);
+        assertGe(finalBalance, balanceBeforeBuyETH + minBuyAmount);
+    }
+}
