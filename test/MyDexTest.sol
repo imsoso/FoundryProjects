@@ -119,4 +119,6 @@ contract MyDexTest is Test {
         uint256 finalBalance = RNT.balanceOf(address(this));
         assertEq(finalBalance, balanceRNTBeforeSellETH + minBuyAmount);
     }
+ 
+    receive() external payable {}
 }
