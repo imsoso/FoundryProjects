@@ -7,4 +7,20 @@ pragma solidity ^0.8.20;
 ➤ Test合约测试：创建RNT-ETH交易对、添加初始化流动性、移除流动性、使用 RNT兑换 ETH，用 ETH兑换RNT
 */
 
-contract MyDex {}
+contract MyDex {
+    /**
+     * @dev 卖出ETH，兑换成 buyToken
+     *      msg.value 为出售的ETH数量
+     * @param buyToken 兑换的目标代币地址
+     * @param minBuyAmount 要求最低兑换到的 buyToken 数量
+     */
+    function sellETH(address buyToken, uint256 minBuyAmount) external payable {}
+
+    /**
+     * @dev 买入ETH，用 sellToken 兑换
+     * @param sellToken 出售的代币地址
+     * @param sellAmount 出售的代币数量
+     * @param minBuyAmount 要求最低兑换到的ETH数量
+     */
+    function buyETH(address sellToken, uint256 sellAmount, uint256 minBuyAmount) external {}
+}
