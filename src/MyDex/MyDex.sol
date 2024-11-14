@@ -16,6 +16,8 @@ contract MyDex {
     IWETH public WETH;
 
     event TokenSwapped(uint amountOut);
+    event ETHSWapped();
+
     constructor(address _uniswapV2Router) {
         uniswapV2Router = IUniswapV2Router02(_uniswapV2Router);
         WETH = IWETH(uniswapV2Router.WETH());
@@ -53,5 +55,17 @@ contract MyDex {
      * @param sellAmount 出售的代币数量
      * @param minBuyAmount 要求最低兑换到的ETH数量
      */
-    function buyETH(address sellToken, uint256 sellAmount, uint256 minBuyAmount) external {}
+    function buyETH(address sellToken, uint256 sellAmount, uint256 minBuyAmount) external {
+        require(sellAmount > 0, 'Invalid sell token amount');
+
+        address[] memory path = new address[](2);
+        path[0] = sellToken;
+        path[1] = address(WETH);
+
+        IERC20(sellToken).transferFrom(msg.sender, address(this), sellAmount);
+        IERC20(sellToken).approve(address(uniswapV2Router), sellAmount);
+        uniswapV2Router.swapExactTokensForETH(sellAmount, minBuyAmount, path, msg.sender, block.timestamp);
+
+        emit ETHSWapped();
+    }
 }
