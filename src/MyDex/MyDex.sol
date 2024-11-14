@@ -19,6 +19,12 @@ contract MyDex {
         uniswapV2Router = IUniswapV2Router02(_uniswapV2Router);
         WETH = IWETH(uniswapV2Router.WETH());
     }
+
+    function getAmountsOut(uint amountIn, address[] memory path) internal view returns (uint amountOut) {
+        uint[] memory amounts = uniswapV2Router.getAmountsOut(amountIn, path);
+        amountOut = amounts[amounts.length - 1];
+    }
+
     /**
      * @dev 卖出ETH，兑换成 buyToken
      *      msg.value 为出售的ETH数量
