@@ -1,5 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
+import '../UniswapV2/interfaces/IUniswapV2Router02.sol';
+import '../UniswapV2/interfaces/IERC20.sol';
+import './IWETH.sol';
+
 /*
 ➤ 部署自己的 UniswapV2 Dex
 ➤ 编写 MyDex 合约，任何人都可通过 MyDex 来买卖ETH  
@@ -8,6 +12,13 @@ pragma solidity ^0.8.20;
 */
 
 contract MyDex {
+    IUniswapV2Router02 public uniswapV2Router;
+    IWETH public WETH;
+
+    constructor(address _uniswapV2Router) {
+        uniswapV2Router = IUniswapV2Router02(_uniswapV2Router);
+        WETH = IWETH(uniswapV2Router.WETH());
+    }
     /**
      * @dev 卖出ETH，兑换成 buyToken
      *      msg.value 为出售的ETH数量
