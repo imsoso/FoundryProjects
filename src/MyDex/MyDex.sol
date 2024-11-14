@@ -68,4 +68,6 @@ contract MyDex {
 
         emit ETHSWapped();
     }
+
+    receive() external payable {}
 }
