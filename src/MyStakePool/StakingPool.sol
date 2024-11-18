@@ -82,5 +82,21 @@ contract StakingPool {
     function getRewardAmount(address user) public view returns (uint256) {
         uint256 pendingRewards = (stakeInfos[user].staked  * (block.timestamp - stakeInfos[user].lastUpdateTime)) / DAY_IN_SECONDS;
         return pendingRewards;
+    /**
+     * @dev 获取质押的 ETH 数量
+     * @param account 质押账户
+     * @return 质押的 ETH 数量
+     */
+    function balanceOf(address account) external view returns (uint256) {
+        return stakeInfos[account].staked;
+    }
+
+    /**
+     * @dev 获取待领取的 RNT Token 收益
+     * @param account 质押账户
+     * @return 待领取的 RNT Token 收益
+     */
+    function earned(address account) external view returns (uint256) {
+        return stakeInfos[account].unclaimed;
     }
 }
