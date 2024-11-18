@@ -40,6 +40,9 @@ contract StakingPool {
 
         stakeInfos[msg.sender].unclaimed += getRewardAmount(msg.sender);
         // Stacked must calculate after getRewardAmount is called 
+        if (stakeInfos[msg.sender].lastUpdateTime == 0) {
+            stakedUsers.push(msg.sender);
+        }
         // because it base on the old staked amount
         stakeInfos[msg.sender].staked += amount;
         stakeInfos[msg.sender].lastUpdateTime = block.timestamp;
