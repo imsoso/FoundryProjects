@@ -68,17 +68,20 @@ contract StakingPool {
         RNTToken.transferFrom(msg.sender, address(this), amount);
         esRNTToken.mint(msg.sender, amount);
     }
-    
-    // calculate the reward amount for the user
-    // user | Staked | Unclaimed| Lastupdatetime|Action
-    // Alice|10|0|10:00|Stake
-    // Alice|10 + 20 | 0 + 10 * 1/24 = 0.41|11:00|Stake
-    // Alice|10 + 20 + 10 | 0.41 + 30 * 2/24 = 2.91|13:00|Stake
-    // Alice|10 + 20 + 10 -15 | 2.91 +40* 2/24 = 6.24|15:00|UnStake
-    // Alice|10 + 20 + 10 -15 | 0|16:00|Claim
-    function getRewardAmount(address user) public view returns (uint256) {
-        uint256 pendingRewards = (stakeInfos[user].staked  * (block.timestamp - stakeInfos[user].lastUpdateTime)) / DAY_IN_SECONDS;
-        return pendingRewards;
+
+    function updateRewardAmount() public {
+        // Calcuate total rewards from last block
+        uint256 multiplier = block.number - lastRewardBlock;
+        uint256 totalReward = REWARD_PER_BLOCK * multiplier;
+
+        uint256 pendingRewards = 0;
+        for (uint256 i = 0; i < stakedUsers.length; i++) {
+            address user = stakedUsers[i];
+            pendingRewards = (stakeInfos[user].staked / totalStakeWeight) * totalReward;
+            stakeInfos[user].unclaimed += pendingRewards;
+        }
+    }
+
     /**
      * @dev 获取质押的 ETH 数量
      * @param account 质押账户
