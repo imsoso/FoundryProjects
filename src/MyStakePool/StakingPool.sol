@@ -35,24 +35,23 @@ contract StakingPool {
     function stake(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
 
-        stakeInfos[msg.sender].unclaimed += getRewardAmount(msg.sender);
-        // Stacked must calculate after getRewardAmount is called 
         if (stakeInfos[msg.sender].lastUpdateTime == 0) {
             stakedUsers.push(msg.sender);
         }
+
+        updateRewardAmount();
+        // Stacked must calculate after getRewardAmount is called
         // because it base on the old staked amount
         stakeInfos[msg.sender].staked += amount;
         stakeInfos[msg.sender].lastUpdateTime = block.timestamp;
     }
 
     function unstake(uint256 amount) external {
-        require(amount > 0, "Amount must be greater than 0");
-        require(stakeInfos[msg.sender].staked >= amount, "Insufficient staked balance");
+        require(amount > 0, 'Amount must be greater than 0');
+        require(stakeInfos[msg.sender].staked >= amount, 'Insufficient staked balance');
 
-        // We still calculate reward amount for the user
-        // because time elapsed before unstake
-        stakeInfos[msg.sender].unclaimed += getRewardAmount(msg.sender);
-        // Stacked must calculate after getRewardAmount is called 
+        updateRewardAmount();
+        // Stacked must calculate after getRewardAmount is called
         // because it base on the old staked amount
         stakeInfos[msg.sender].staked -= amount;
         stakeInfos[msg.sender].lastUpdateTime = block.timestamp;
