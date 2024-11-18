@@ -16,6 +16,9 @@ contract StakingPool {
     uint256 public constant REWARD_RATE = 1; // 1 RNT per day
     uint256 public constant LOCK_PERIOD = 30 days;
     uint256 public constant DAY_IN_SECONDS = 86400 ;
+    uint256 public constant REWARD_PER_BLOCK = 10 ether; // 10 RNT per block
+    uint256 public lastRewardBlock; // The block number of the last reward
+    uint256 public totalStakeWeight; // The total weight of all staked
 
     struct StakeInfo {
         uint256 staked;
@@ -23,11 +26,12 @@ contract StakingPool {
         uint256 lastUpdateTime;
     }
     mapping(address => StakeInfo) public stakeInfos;
-
+    address[] stakedUsers;
 
     constructor(address _esRNTToken, address _RNTToken) {
         esRNTToken = esRNT(_esRNTToken);
         RNTToken = RNT(_RNTToken);
+        lastRewardBlock = block.number; // Set the last reward block to the current block
     }
 
     // User can stake their RNT to get rewards
