@@ -9,8 +9,8 @@ import { ERC20Votes } from '@openzeppelin/contracts/token/ERC20/extensions/ERC20
 import { Nonces } from '@openzeppelin/contracts/utils/Nonces.sol';
 import { Ownable } from '@openzeppelin/contracts/access/Ownable.sol';
 
-contract MyToken is ERC20, ERC20Pausable, Ownable, ERC20Permit, ERC20Votes {
-    constructor(address initialOwner) ERC20('MyToken', 'MTK') Ownable(initialOwner) ERC20Permit('MyToken') {}
+contract PollToken is ERC20, ERC20Pausable, Ownable, ERC20Permit, ERC20Votes {
+    constructor(address initialOwner) ERC20('PollToken', 'PTK') Ownable(initialOwner) ERC20Permit('PollToken') {}
 
     function pause() public onlyOwner {
         _pause();
