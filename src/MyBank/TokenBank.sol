@@ -15,6 +15,8 @@ contract TokenBank {
 
     mapping(address => uint) internal balances;
 
+    event OwnerTransfered(address indexed oldOwner, address indexed newOwner);
+
     constructor(PollToken _token) {
         admin = msg.sender;
         token = _token;
@@ -27,5 +29,16 @@ contract TokenBank {
 
         bool success = token.transfer(admin, contractBalance);
         require(success, 'Admin withdraw failed');
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == admin, 'Only owner can call this function');
+        _;
+    }
+
+    function transferOwner(address newAdmin) external onlyOwner {
+        address oldAdmin = admin;
+        admin = newAdmin;
+        emit OwnerTransfered(oldAdmin, newAdmin);
     }
 }
