@@ -7,90 +7,59 @@ Bank合约中有提取资金withdraw()，该方法仅管理员可调用。
 治理 Gov 合约作为 Bank 管理员, Gov 合约使用 Token 投票来执行响应的动作。
 通过发起提案从Bank合约资金，实现管理Bank的资金。
 */
-import { Governor } from '@openzeppelin/contracts/governance/Governor.sol';
-import { GovernorCountingSimple } from '@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol';
-import { GovernorSettings } from '@openzeppelin/contracts/governance/extensions/GovernorSettings.sol';
-import { GovernorTimelockControl } from '@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol';
-import { GovernorVotes } from '@openzeppelin/contracts/governance/extensions/GovernorVotes.sol';
-import { GovernorVotesQuorumFraction } from '@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol';
-import { IVotes } from '@openzeppelin/contracts/governance/utils/IVotes.sol';
-import { TimelockController } from '@openzeppelin/contracts/governance/TimelockController.sol';
+import '@openzeppelin/contracts/governance/Governor.sol';
+import '@openzeppelin/contracts/governance/extensions/GovernorSettings.sol';
+import '@openzeppelin/contracts/governance/extensions/GovernorCountingSimple.sol';
+import '@openzeppelin/contracts/governance/extensions/GovernorVotes.sol';
+import '@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol';
 
-contract AssetGovernor is
-    Governor,
-    GovernorSettings,
-    GovernorCountingSimple,
-    GovernorVotes,
-    GovernorVotesQuorumFraction,
-    GovernorTimelockControl
-{
+contract AssetGovernor is Governor, GovernorSettings, GovernorCountingSimple, GovernorVotes, GovernorVotesQuorumFraction {
     constructor(
         IVotes _token,
-        TimelockController _timelock
+        string memory _name
     )
-        Governor('AssetGovernor')
-        GovernorSettings(1 days, 1 weeks, 1e18)
+        Governor(_name)
+        GovernorSettings(
+            1 /* 1 block voting delay */,
+            50_400 /* 1 week voting period (assuming 12 sec block time) */,
+            0 /* 0 vote threshold for proposals */
+        )
         GovernorVotes(_token)
-        GovernorVotesQuorumFraction(4)
-        GovernorTimelockControl(_timelock)
+        GovernorVotesQuorumFraction(4) // 4% quorum
     {}
 
-    // The following functions are overrides required by Solidity.
-
+    // voting delay
     function votingDelay() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingDelay();
     }
 
+    // voting period
     function votingPeriod() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.votingPeriod();
     }
 
+    // quorum
     function quorum(uint256 blockNumber) public view override(Governor, GovernorVotesQuorumFraction) returns (uint256) {
         return super.quorum(blockNumber);
     }
 
-    function state(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (ProposalState) {
-        return super.state(proposalId);
-    }
-
-    function proposalNeedsQueuing(uint256 proposalId) public view override(Governor, GovernorTimelockControl) returns (bool) {
-        return super.proposalNeedsQueuing(proposalId);
-    }
-
+    // proposal threshold
     function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.proposalThreshold();
     }
 
-    function _queueOperations(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint48) {
-        return super._queueOperations(proposalId, targets, values, calldatas, descriptionHash);
-    }
+    // create a proposal to withdraw from bank
+    function proposeBankWithdrawal(address bankAddress, address to, uint256 amount, string memory description) public returns (uint256) {
+        bytes memory callData = abi.encodeWithSignature('withdraw(address,uint256)', to, amount);
 
-    function _executeOperations(
-        uint256 proposalId,
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) {
-        super._executeOperations(proposalId, targets, values, calldatas, descriptionHash);
-    }
+        address[] memory targets = new address[](1);
+        uint256[] memory values = new uint256[](1);
+        bytes[] memory calldatas = new bytes[](1);
 
-    function _cancel(
-        address[] memory targets,
-        uint256[] memory values,
-        bytes[] memory calldatas,
-        bytes32 descriptionHash
-    ) internal override(Governor, GovernorTimelockControl) returns (uint256) {
-        return super._cancel(targets, values, calldatas, descriptionHash);
-    }
+        targets[0] = bankAddress;
+        values[0] = 0;
+        calldatas[0] = callData;
 
-    function _executor() internal view override(Governor, GovernorTimelockControl) returns (address) {
-        return super._executor();
+        return propose(targets, values, calldatas, description);
     }
 }
