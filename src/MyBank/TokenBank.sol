@@ -7,38 +7,29 @@ Bank合约中有提取资金withdraw()，该方法仅管理员可调用。
 治理 Gov 合约作为 Bank 管理员, Gov 合约使用 Token 投票来执行响应的动作。
 通过发起提案从Bank合约资金，实现管理Bank的资金。
 */
-import '../MyToken/PollToken.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/utils/Address.sol';
 
-contract TokenBank {
-    address admin;
-    PollToken public token;
+contract TokenBank is Ownable {
+    error InsufficientBalance();
 
-    mapping(address => uint) internal balances;
+    event Withdrawal(address indexed to, uint256 amount);
+    event Deposit(address indexed from, uint256 amount);
 
-    event OwnerTransfered(address indexed oldOwner, address indexed newOwner);
+    constructor(address initialOwner) Ownable(initialOwner) {}
 
-    constructor(PollToken _token) {
-        admin = msg.sender;
-        token = _token;
+    receive() external payable {
+        emit Deposit(msg.sender, msg.value);
     }
 
-    function withdraw(uint256 amount) public {
-        require(msg.sender == admin, 'Only admin can withdraw');
-        uint256 contractBalance = token.balanceOf(address(this));
-        require(contractBalance > 0, 'No tokens to withdraw');
-
-        bool success = token.transfer(admin, contractBalance);
-        require(success, 'Admin withdraw failed');
+    // only owner(Governor) can withdraw
+    function withdraw(address to, uint256 amount) external onlyOwner {
+        if (address(this).balance < amount) revert InsufficientBalance();
+        Address.sendValue(payable(to), amount);
+        emit Withdrawal(to, amount);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == admin, 'Only owner can call this function');
-        _;
-    }
-
-    function transferOwner(address newAdmin) external onlyOwner {
-        address oldAdmin = admin;
-        admin = newAdmin;
-        emit OwnerTransfered(oldAdmin, newAdmin);
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
 }
